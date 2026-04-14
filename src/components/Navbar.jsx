@@ -6,7 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { getCartCount } = useCart();
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
@@ -19,13 +28,13 @@ const Navbar = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'linear-gradient(135deg, #1A1A1A, #3A2E2E)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(245, 198, 198, 0.1)',
-        padding: '0.8rem 2rem',
+        background: scrolled ? 'rgba(10, 10, 10, 0.85)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+        padding: scrolled ? '0.8rem 2rem' : '1.2rem 2.2rem',
         transition: 'all 0.4s ease',
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)'
+        boxShadow: scrolled ? '0 10px 30px rgba(0, 0, 0, 0.3)' : 'none'
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 0 10px rgba(255,117,143,0.3))' }} />
@@ -45,8 +54,13 @@ const Navbar = () => {
             <Link 
               key={link.name}
               to={link.path} 
-              style={{ color: '#F5C6C6', textDecoration: 'none', transition: 'color 0.3s ease' }}
-              onMouseOver={(e) => e.target.style.color = '#E8AFAF'}
+              style={{ 
+                color: '#F5C6C6', 
+                textDecoration: 'none', 
+                transition: 'all 0.3s ease',
+                textShadow: scrolled ? 'none' : '0 2px 4px rgba(0,0,0,0.5)'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#fff'}
               onMouseOut={(e) => e.target.style.color = '#F5C6C6'}
             >
               {link.name}
