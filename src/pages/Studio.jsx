@@ -83,10 +83,12 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [isAiDetectionActive, setIsAiDetectionActive] = useState(true);
+  const [naturalDims, setNaturalDims] = useState({ w: 100, h: 100 });
   
   const webcamRef = useRef(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [lipPath, setLipPath] = useState("");
+  const [lipTopPath, setLipTopPath] = useState("");
+  const [lipBotPath, setLipBotPath] = useState("");
   const [eyeLPath, setEyeLPath] = useState("");
   const [eyeRPath, setEyeRPath] = useState("");
   const [cheekPins, setCheekPins] = useState([]);
@@ -118,14 +120,39 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
     if (result) {
       const naturalW = source.naturalWidth || source.videoWidth || source.width;
       const naturalH = source.naturalHeight || source.videoHeight || source.height;
+      setNaturalDims({ w: naturalW, h: naturalH });
+      
       const landmarks = result.landmarks.positions;
-      const getP = (i) => ({ x: (landmarks[i].x / naturalW) * 100, y: (landmarks[i].y / naturalH) * 100 });
+      const getP = (i) => ({ x: landmarks[i].x, y: landmarks[i].y });
 
-      // FULL OUTER LIPS (Indices 48-59)
-      let lPath = `M ${getP(48).x} ${getP(48).y}`;
-      for (let i = 49; i <= 59; i++) lPath += ` L ${getP(i).x} ${getP(i).y}`;
-      lPath += " Z";
-      setLipPath(lPath);
+      // PROPER LIP DETECTION: Two completely independent solid loops
+      // Pure Dlib 68-point native vertex sequences
+      const upperPts = [48, 49, 50, 51, 52, 53, 54, 64, 63, 62, 61, 60];
+      const lowerPts = [48, 60, 67, 66, 65, 64, 54, 55, 56, 57, 58, 59];
+
+      // Smooth Catmull-Rom Spline generator for buttery flawless curves (like aimakeup.app)
+      const svgSmoothPoly = (pointsArray) => {
+        const pts = pointsArray.map(getP);
+        let d = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 0; i < pts.length; i++) {
+            const p0 = pts[(i - 1 + pts.length) % pts.length];
+            const p1 = pts[i];
+            const p2 = pts[(i + 1) % pts.length];
+            const p3 = pts[(i + 2) % pts.length];
+            
+            // Generate Cubic Bezier control points for perfect curve hugging
+            const cp1x = p1.x + (p2.x - p0.x) / 6;
+            const cp1y = p1.y + (p2.y - p0.y) / 6;
+            const cp2x = p2.x - (p3.x - p1.x) / 6;
+            const cp2y = p2.y - (p3.y - p1.y) / 6;
+            
+            d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+        }
+        return d + " Z";
+      };
+
+      setLipTopPath(svgSmoothPoly(upperPts));
+      setLipBotPath(svgSmoothPoly(lowerPts));
 
       // EYES (36-41 for left, 42-47 for right)
       let elPath = `M ${getP(36).x} ${getP(36).y}`;
@@ -152,7 +179,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
   }, [isAiDetectionActive, mode, runDetection]);
 
   return (
-    <div style={{ maxWidth: '1440px', margin: '0 auto', height: '100dvh', display: 'flex', flexDirection: 'column', background: '#000' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', background: '#0a0a0a' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', zIndex: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -160,49 +187,62 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
             <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white' }}>AI Pro Studio</h2>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-             <button onClick={() => { setMode(mode === 'photo' ? 'camera' : 'photo'); if(mode==='camera') setImage('/reference_model.png'); }} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><RefreshCcw size={14} /> CAM</button>
              <button style={{ background: PRIMARY_COLOR, border: 'none', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Download size={14} /> EXPORT</button>
           </div>
         </div>
 
         {/* Studio Viewport */}
-        <div style={{ flex: 1, position: 'relative', display: 'flex', overflow: 'hidden' }}>
+        <div className="studio-ui-wrapper">
           
           {/* Main Workspace (Image/Webcam) */}
-          <div style={{ flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <AnimatePresence>
-              {isLoading && (
-                <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'absolute', inset: 0, zIndex: 100, background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ color: PRIMARY_COLOR, marginBottom: '20px' }}><RefreshCcw size={48} /></motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%', maxHeight: '100%' }}>
-                {mode === 'photo' ? (
-                  <img id="studio-image" src={image} alt="Model" onLoad={runDetection} style={{ maxWidth: '100%', maxHeight: '85vh', display: 'block' }} />
-                ) : (
-                  <Webcam ref={webcamRef} videoConstraints={{ facingMode: "user" }} style={{ maxWidth: '100%', maxHeight: '85vh', display: 'block' }} />
+          <div className="studio-workspace" style={{ position: 'relative', display: 'flex', flex: 1, overflow: 'hidden', background: '#000' }}>
+              
+              {/* Full Bleed Image Container */}
+              <div style={{ position: 'absolute', inset: 0 }}>
+                  <img id="studio-image" src={image} alt="Model" onLoad={runDetection} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  
+                  {/* SVG MAKEUP OVERLAY (Automatically geometrically matches object-fit: contain) */}
+                  <svg viewBox={`0 0 ${naturalDims.w || 100} ${naturalDims.h || 100}`} preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
+                    {/* Eyeshadow */}
+                    <path d={eyeLPath} fill={eyeshadowColor} style={{ opacity: opacity * 0.5, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.01}px)` }} />
+                    <path d={eyeRPath} fill={eyeshadowColor} style={{ opacity: opacity * 0.5, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.01}px)` }} />
+                    
+                    {/* Blush */}
+                    {cheekPins.map((p, i) => <circle key={`cheek-${i}`} cx={p.x} cy={p.y} r={naturalDims.w * 0.05} fill={blushColor} style={{ opacity: opacity * 0.4, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.03}px)` }} />)}
+                    
+                    {/* ULTRA-REALISTIC LIPSTICK APPLICATION (Pro App Level) */}
+                    <g style={{ opacity: opacity }}>
+                      {/* Base Color & Uniform Vector Expansion (Stroke) to perfectly align with vermilion boundary */}
+                      <path d={lipTopPath} fill={lipstickColor} stroke={lipstickColor} strokeWidth={naturalDims.w * 0.005} strokeLinejoin="round" style={{ mixBlendMode: 'color' }} />
+                      <path d={lipBotPath} fill={lipstickColor} stroke={lipstickColor} strokeWidth={naturalDims.w * 0.005} strokeLinejoin="round" style={{ mixBlendMode: 'color' }} />
+                      
+                      {/* Multiply (Depth & Shadows) + Micro Feathering for skin blending */}
+                      <path d={lipTopPath} fill={lipstickColor} stroke={lipstickColor} strokeWidth={naturalDims.w * 0.004} style={{ opacity: 0.6, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.002}px)` }} />
+                      <path d={lipBotPath} fill={lipstickColor} stroke={lipstickColor} strokeWidth={naturalDims.w * 0.004} style={{ opacity: 0.6, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.002}px)` }} />
+                      
+                      {/* Soft Light (Texture & Highlights) */}
+                      <path d={lipTopPath} fill={lipstickColor} style={{ opacity: 0.5, mixBlendMode: 'soft-light' }} />
+                      <path d={lipBotPath} fill={lipstickColor} style={{ opacity: 0.5, mixBlendMode: 'soft-light' }} />
+                      
+                      {/* Vividness Overlay */}
+                      <path d={lipTopPath} fill={lipstickColor} style={{ opacity: 0.2, mixBlendMode: 'overlay' }} />
+                      <path d={lipBotPath} fill={lipstickColor} style={{ opacity: 0.2, mixBlendMode: 'overlay' }} />
+                    </g>
+                  </svg>
+              </div>
+              
+              {/* Loader Overlay */}
+              <AnimatePresence>
+                {isLoading && (
+                  <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.8)', display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ color: PRIMARY_COLOR }}><RefreshCcw size={48} /></motion.div>
+                  </motion.div>
                 )}
-                
-                {/* SVG MAKEUP OVERLAY */}
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 5 }}>
-                  {/* Eyeshadow */}
-                  <path d={eyeLPath} fill={eyeshadowColor} style={{ opacity: opacity * 0.5, mixBlendMode: 'multiply', filter: 'blur(1px)' }} />
-                  <path d={eyeRPath} fill={eyeshadowColor} style={{ opacity: opacity * 0.5, mixBlendMode: 'multiply', filter: 'blur(1px)' }} />
-                  
-                  {/* Blush */}
-                  {cheekPins.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="8" fill={blushColor} style={{ opacity: opacity * 0.3, mixBlendMode: 'multiply', filter: 'blur(3px)' }} />)}
-                  
-                  {/* FULL LIPSTICK */}
-                  <path d={lipPath} fill={lipstickColor} style={{ opacity: opacity, mixBlendMode: 'color', filter: 'blur(0.2px)' }} />
-                  <path d={lipPath} fill={lipstickColor} style={{ opacity: opacity * 0.3, mixBlendMode: 'multiply', filter: 'blur(0.5px)' }} />
-                </svg>
-            </div>
+              </AnimatePresence>
           </div>
 
           {/* Right Controls Panel */}
-          <div style={{ width: 'min(180px, 40%)', background: 'rgba(20,20,20,0.9)', backdropFilter: 'blur(20px)', borderLeft: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', padding: '16px 10px', overflowY: 'auto', zIndex: 30 }} className="hide-scrollbar">
+          <div className="studio-ui-sidebar hide-scrollbar">
             
             {/* Nav Icons */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>

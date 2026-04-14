@@ -40,14 +40,9 @@ const Footer = () => {
 
 
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '4rem',
-          marginBottom: '6rem'
-        }}>
+        <div className="footer-grid">
           {/* Brand Column */}
-          <div style={{ gridColumn: 'span 2' }}>
+          <div className="footer-brand">
             <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '80px', width: 'auto', marginBottom: '1.2rem', filter: 'drop-shadow(0 0 15px rgba(255,117,143,0.3))' }} />
             <motion.h2 
               animate={{ y: [0, -4, 0] }}
@@ -207,7 +202,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div style={{ 
+        <div className="footer-bottom-bar" style={{ 
           paddingTop: '3rem', 
           borderTop: '1px solid rgba(255,255,255,0.05)', 
           display: 'flex', 

@@ -141,8 +141,8 @@ const AIAssistant = () => {
               maxWidth: '900px', 
               margin: '0 auto',
               background: 'rgba(0,0,0,0.35)',
-              padding: '4rem 2rem',
-              borderRadius: '50px',
+              padding: 'clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 2rem)',
+              borderRadius: 'clamp(20px, 5vw, 50px)',
               backdropFilter: 'blur(15px)',
               border: '1px solid rgba(255,255,255,0.1)',
               boxShadow: '0 40px 100px rgba(0,0,0,0.3)'
@@ -254,9 +254,9 @@ const AIAssistant = () => {
                   <video ref={videoRef} autoPlay playsInline style={{ width: '100%', display: 'block' }} />
                   <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,255,255,0.2)', pointerEvents: 'none', borderRadius: '30px', margin: '20px' }}></div>
                 </div>
-                <div style={{ marginTop: '2rem', display: 'flex', gap: '1.5rem' }}>
-                  <button className="btn btn-secondary" onClick={() => setShowCamera(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={capturePhoto}>Capture ✨</button>
+                <div style={{ marginTop: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', width: '100%' }}>
+                  <button className="btn btn-secondary" style={{ flex: '1 1 120px' }} onClick={() => setShowCamera(false)}>Cancel</button>
+                  <button className="btn btn-primary" style={{ flex: '1 1 120px' }} onClick={capturePhoto}>Capture ✨</button>
                 </div>
               </motion.div>
             )}
@@ -275,8 +275,8 @@ const AIAssistant = () => {
               maxWidth: '700px', 
               margin: '0 auto',
               background: 'rgba(0,0,0,0.35)',
-              padding: '4rem 2rem',
-              borderRadius: '50px',
+              padding: 'clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 2rem)',
+              borderRadius: 'clamp(20px, 5vw, 50px)',
               backdropFilter: 'blur(15px)',
               border: '1px solid rgba(255,255,255,0.1)',
               boxShadow: '0 40px 100px rgba(0,0,0,0.3)'
@@ -285,7 +285,7 @@ const AIAssistant = () => {
             <div className="badge">STEP 2: ANALYSIS</div>
             <h2 style={{ marginBottom: '3rem', fontSize: '2.5rem', fontWeight: 900 }}>Ready for your scan?</h2>
             
-            <div style={{ position: 'relative', margin: '0 auto 4rem', width: '320px', height: '420px', borderRadius: '40px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', border: '2px solid rgba(255,255,255,0.2)' }}>
+            <div style={{ position: 'relative', margin: '0 auto 4rem', width: '100%', maxWidth: '320px', aspectRatio: '3/4', borderRadius: 'clamp(20px, 5vw, 40px)', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', border: '2px solid rgba(255,255,255,0.2)' }}>
               <img src={image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="User" />
               {isAnalyzing && (
                 <motion.div 
@@ -303,9 +303,9 @@ const AIAssistant = () => {
                 <p className="premium-text" style={{ fontSize: '1.4rem', fontWeight: 700, color: 'white' }}>Analyzing skin texture and concerns...</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-                <button className="btn btn-secondary" style={{ padding: '1rem 2rem' }} onClick={() => setStep(1)}>Retry</button>
-                <button className="btn btn-primary" style={{ padding: '1rem 3rem' }} onClick={analyzeImage}>Start Analysis ✨</button>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
+                <button className="btn btn-secondary" style={{ flex: '1 1 120px', padding: '1rem 2rem' }} onClick={() => setStep(1)}>Retry</button>
+                <button className="btn btn-primary" style={{ flex: '1 1 200px', padding: '1rem 2rem' }} onClick={analyzeImage}>Start Analysis ✨</button>
               </div>
             )}
           </motion.div>
@@ -322,8 +322,8 @@ const AIAssistant = () => {
               maxWidth: '1200px', 
               margin: '0 auto',
               background: 'rgba(0,0,0,0.35)',
-              padding: '5rem 4rem',
-              borderRadius: '60px',
+              padding: 'clamp(2rem, 5vw, 5rem) clamp(1rem, 5vw, 4rem)',
+              borderRadius: 'clamp(30px, 5vw, 60px)',
               backdropFilter: 'blur(15px)',
               border: '1px solid rgba(255,255,255,0.1)',
               boxShadow: '0 40px 100px rgba(0,0,0,0.3)'
@@ -332,14 +332,14 @@ const AIAssistant = () => {
             <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
               <div className="badge">ANALYSIS COMPLETE</div>
               <h1 style={{ fontSize: 'clamp(3rem, 10vw, 4.5rem)', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>✨ Your Beauty Report</h1>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', marginTop: '3rem' }}>
-                <div className="glass-card" style={{ padding: '2rem 3.5rem', borderRadius: '30px', background: 'rgba(255,255,255,0.03)' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginTop: '3rem' }}>
+                <div className="glass-card" style={{ flex: '1 1 200px', padding: 'clamp(1.5rem, 4vw, 2rem) clamp(1.5rem, 5vw, 3.5rem)', borderRadius: 'clamp(20px, 5vw, 30px)', background: 'rgba(255,255,255,0.03)' }}>
                   <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Detected Skin Type</p>
-                  <h3 className="text-skincare" style={{ fontSize: '2rem', fontWeight: 900 }}>{report.type}</h3>
+                  <h3 className="text-skincare" style={{ fontSize: '1.8rem', fontWeight: 900 }}>{report.type}</h3>
                 </div>
-                <div className="glass-card" style={{ padding: '2rem 3.5rem', borderRadius: '30px', background: 'rgba(255,255,255,0.03)' }}>
+                <div className="glass-card" style={{ flex: '1 1 200px', padding: 'clamp(1.5rem, 4vw, 2rem) clamp(1.5rem, 5vw, 3.5rem)', borderRadius: 'clamp(20px, 5vw, 30px)', background: 'rgba(255,255,255,0.03)' }}>
                   <p style={{ fontSize: '0.9rem', opacity: 0.6, marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Key concerns</p>
-                  <h3 className="text-eye-makeup" style={{ fontSize: '2rem', fontWeight: 900 }}>{report.concerns}</h3>
+                  <h3 className="text-eye-makeup" style={{ fontSize: '1.8rem', fontWeight: 900 }}>{report.concerns}</h3>
                 </div>
               </div>
             </div>
@@ -392,17 +392,17 @@ const AIAssistant = () => {
               ))}
             </div>
 
-            <div className="glass-card" style={{ textAlign: 'center', padding: '5rem', borderRadius: '50px', background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="glass-card" style={{ textAlign: 'center', padding: 'clamp(2rem, 5vw, 5rem)', borderRadius: 'clamp(25px, 5vw, 50px)', background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '50%', marginBottom: '2.5rem' }}>
                 <CheckCircle2 size={48} className="text-skincare" />
               </div>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Unlock This Routine</h2>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: 900, marginBottom: '1.5rem' }}>Unlock This Routine</h2>
               <p style={{ maxWidth: '600px', margin: '0 auto 3.5rem', fontSize: '1.1rem', opacity: 0.7, lineHeight: 1.6 }}>
                 Save this bespoke report and receive exclusive member-only discounts on your personalized collection.
               </p>
-              <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center' }}>
-                <button className="btn btn-secondary" style={{ padding: '1rem 2.5rem' }}>Export PDF</button>
-                <button className="btn btn-primary" style={{ padding: '1rem 3.5rem', background: 'white', color: 'black' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
+                <button className="btn btn-secondary" style={{ flex: '1 1 200px', padding: '1rem 2rem' }}>Export PDF</button>
+                <button className="btn btn-primary" style={{ flex: '1 1 200px', padding: '1rem 2rem', background: 'white', color: 'black' }}>
                   Join & Shop ✨
                 </button>
               </div>
