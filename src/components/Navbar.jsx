@@ -11,41 +11,45 @@ const Navbar = () => {
   return (
     <>
       <nav className="navbar-container" style={{
-        position: 'sticky',
+        position: 'fixed',
         top: '0',
+        left: '0',
+        right: '0',
         zIndex: 1001,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'transparent',
-        border: 'none',
-        backdropFilter: 'none',
-        boxShadow: 'none'
+        background: 'rgba(0, 0, 0, 0.25)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        padding: '0.8rem 2rem',
+        transition: 'all 0.4s ease'
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 0 10px rgba(255,117,143,0.3))' }} />
         </Link>
 
         {/* Desktop Links */}
-        <div className="nav-links" style={{ display: 'flex', gap: '1.5rem', fontSize: '0.95rem', fontWeight: '700' }}>
-          <Link to="/" style={{ color: 'white' }}>Home</Link>
-          <Link to="/category/lips" style={{ color: '#FF758F' }}>Lips</Link>
-          <Link to="/category/face-products" style={{ color: '#FF9A8B' }}>Face</Link>
-          <Link to="/category/eye-makeup" style={{ color: '#B721FF' }}>Eyes</Link>
-          <Link to="/category/skincare" style={{ color: '#84fab0' }}>Skincare</Link>
-          <Link to="/test-model" style={{ color: 'white', opacity: 0.8 }}>Try-On</Link>
-          <Link to="/ai-assistant" style={{ color: '#FF758F', fontWeight: '800' }}>AI Assistant</Link>
+        <div className="nav-links" style={{ display: 'flex', gap: '1.2rem', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
+          <Link to="/category/lips" style={{ color: '#FF758F', textDecoration: 'none' }}>Lips</Link>
+          <Link to="/category/face-products" style={{ color: '#FF9A8B', textDecoration: 'none' }}>Face</Link>
+          <Link to="/category/eye-makeup" style={{ color: '#B721FF', textDecoration: 'none' }}>Eyes</Link>
+          <Link to="/category/skincare" style={{ color: '#84fab0', textDecoration: 'none' }}>Skincare</Link>
+          <Link to="/test-model" style={{ color: 'white', opacity: 0.9, textDecoration: 'none' }}>Try-On</Link>
+          <Link to="/ai-assistant" style={{ color: '#FF758F', fontWeight: '900', textDecoration: 'none' }}>AI Assistant</Link>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <Link to="/cart" style={{ color: 'inherit', display: 'flex', position: 'relative', textDecoration: 'none' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', color: 'white' }}>
+          <Link to="/cart" style={{ color: 'white', display: 'flex', position: 'relative', textDecoration: 'none' }}>
             <ShoppingBag size={20} />
-            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-makeup)', color: 'white', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%' }}>{getCartCount()}</span>
+            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-makeup)', color: 'white', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>{getCartCount()}</span>
           </Link>
-          <Link to="/wishlist" style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>
+          <Link to="/wishlist" style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
             <Heart size={20} style={{ cursor: 'pointer' }} />
           </Link>
-          <User size={20} style={{ cursor: 'pointer' }} className="nav-links" />
+          <User size={20} style={{ cursor: 'pointer', color: 'white' }} className="nav-links" />
 
           <div className="mobile-only" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
             {isOpen ? <X size={28} color="white" /> : <Menu size={28} color="white" />}
