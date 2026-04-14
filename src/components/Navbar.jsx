@@ -28,17 +28,15 @@ const Navbar = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: scrolled ? 'rgba(10, 10, 10, 0.85)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
-        padding: scrolled ? '0.8rem 2rem' : '1.2rem 2.2rem',
+        background: 'transparent',
+        padding: scrolled ? '1rem 2rem' : '1.5rem 2.2rem',
         transition: 'all 0.4s ease',
-        boxShadow: scrolled ? '0 10px 30px rgba(0, 0, 0, 0.3)' : 'none'
+        pointerEvents: 'none' // Allow clicks to pass through transparent areas
       }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 0 10px rgba(255,117,143,0.3))' }} />
-        </Link>
+        <div style={{ pointerEvents: 'auto', display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.8))' }} />
+          </Link>
 
         {/* Desktop Links */}
         <div className="nav-links" style={{ display: 'flex', gap: '1.2rem', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -58,7 +56,7 @@ const Navbar = () => {
                 color: '#F5C6C6', 
                 textDecoration: 'none', 
                 transition: 'all 0.3s ease',
-                textShadow: scrolled ? 'none' : '0 2px 4px rgba(0,0,0,0.5)'
+                textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8)'
               }}
               onMouseOver={(e) => e.target.style.color = '#fff'}
               onMouseOut={(e) => e.target.style.color = '#F5C6C6'}
@@ -68,10 +66,10 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', color: '#F5C6C6' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', color: '#F5C6C6', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }}>
           <Link to="/cart" style={{ color: '#F5C6C6', display: 'flex', position: 'relative', textDecoration: 'none' }}>
             <ShoppingBag size={20} />
-            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#F5C6C6', color: '#1A1A1A', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%', fontWeight: '900' }}>{getCartCount()}</span>
+            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#F5C6C6', color: '#1A1A1A', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%', fontWeight: '900', textShadow: 'none' }}>{getCartCount()}</span>
           </Link>
           <Link to="/wishlist" style={{ color: '#F5C6C6', display: 'flex', alignItems: 'center' }}>
             <Heart size={20} style={{ cursor: 'pointer' }} />
@@ -81,6 +79,7 @@ const Navbar = () => {
           <div className="mobile-only" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
             {isOpen ? <X size={28} color="#F5C6C6" /> : <Menu size={28} color="#F5C6C6" />}
           </div>
+        </div>
         </div>
       </nav>
 
