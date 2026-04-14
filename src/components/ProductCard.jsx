@@ -99,9 +99,14 @@ const ProductCard = ({ product, type }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: 'transparent',
-        transform: isHovering ? 'translateY(-6px)' : 'translateY(0px)',
-        transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+        borderRadius: '32px',
+        background: 'rgba(255, 255, 255, 0.03)',
+        backdropFilter: 'blur(15px)',
+        WebkitBackdropFilter: 'blur(15px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        transform: isHovering ? 'translateY(-10px)' : 'translateY(0px)',
+        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: isHovering ? '0 30px 60px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.1)'
       }}
     >
       <div style={{
@@ -109,34 +114,44 @@ const ProductCard = ({ product, type }) => {
         overflow: 'hidden',
         width: '100%',
         aspectRatio: '1',
-        background: 'transparent',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
+        {/* Layered Inner Glow (The '2nd image' effect) */}
+        <div style={{
+          position: 'absolute',
+          width: '70%',
+          height: '70%',
+          background: style.badgeColor,
+          borderRadius: '50%',
+          filter: 'blur(60px)',
+          opacity: isHovering ? 0.3 : 0.15,
+          transition: 'opacity 0.8s ease'
+        }} />
+
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
           style={{ 
             width: '100%', 
             height: '100%', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            willChange: 'transform'
+            zIndex: 1
           }}
         >
           <img
             src={hasFrames && isHovering ? product.frames[currentFrame] : product.image}
             alt={product.name}
             style={{
-              width: '90%',
-              height: '90%',
+              width: '85%',
+              height: '85%',
               objectFit: 'contain',
-              transform: isHovering ? 'scale(1.25)' : 'scale(1)',
-              transition: hasFrames && isHovering ? 'none' : 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)',
-              transformOrigin: 'center center',
-              filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.15))'
+              transform: isHovering ? 'scale(1.2)' : 'scale(1)',
+              transition: hasFrames && isHovering ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+              filter: isHovering ? 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' : 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
             }}
           />
         </motion.div>
