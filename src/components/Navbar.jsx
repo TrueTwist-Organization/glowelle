@@ -19,12 +19,13 @@ const Navbar = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        background: 'rgba(0, 0, 0, 0.25)',
+        background: 'linear-gradient(135deg, #1A1A1A, #3A2E2E)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        borderBottom: '1px solid rgba(245, 198, 198, 0.1)',
         padding: '0.8rem 2rem',
-        transition: 'all 0.4s ease'
+        transition: 'all 0.4s ease',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)'
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 0 10px rgba(255,117,143,0.3))' }} />
@@ -32,27 +33,39 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="nav-links" style={{ display: 'flex', gap: '1.2rem', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
-          <Link to="/category/lips" style={{ color: '#FF758F', textDecoration: 'none' }}>Lips</Link>
-          <Link to="/category/face-products" style={{ color: '#FF9A8B', textDecoration: 'none' }}>Face</Link>
-          <Link to="/category/eye-makeup" style={{ color: '#B721FF', textDecoration: 'none' }}>Eyes</Link>
-          <Link to="/category/skincare" style={{ color: '#84fab0', textDecoration: 'none' }}>Skincare</Link>
-          <Link to="/test-model" style={{ color: 'white', opacity: 0.9, textDecoration: 'none' }}>Try-On</Link>
-          <Link to="/ai-assistant" style={{ color: '#FF758F', fontWeight: '900', textDecoration: 'none' }}>AI Assistant</Link>
+          {[
+            { name: 'Home', path: '/' },
+            { name: 'Lips', path: '/category/lips' },
+            { name: 'Face', path: '/category/face-products' },
+            { name: 'Eyes', path: '/category/eye-makeup' },
+            { name: 'Skincare', path: '/category/skincare' },
+            { name: 'Try-On', path: '/test-model' },
+            { name: 'AI Assistant', path: '/ai-assistant' }
+          ].map((link) => (
+            <Link 
+              key={link.name}
+              to={link.path} 
+              style={{ color: '#F5C6C6', textDecoration: 'none', transition: 'color 0.3s ease' }}
+              onMouseOver={(e) => e.target.style.color = '#E8AFAF'}
+              onMouseOut={(e) => e.target.style.color = '#F5C6C6'}
+            >
+              {link.name}
+            </Link>
+          ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', color: 'white' }}>
-          <Link to="/cart" style={{ color: 'white', display: 'flex', position: 'relative', textDecoration: 'none' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', color: '#F5C6C6' }}>
+          <Link to="/cart" style={{ color: '#F5C6C6', display: 'flex', position: 'relative', textDecoration: 'none' }}>
             <ShoppingBag size={20} />
-            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-makeup)', color: 'white', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>{getCartCount()}</span>
+            <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#F5C6C6', color: '#1A1A1A', fontSize: '0.65rem', padding: '2px 5px', borderRadius: '50%', fontWeight: '900' }}>{getCartCount()}</span>
           </Link>
-          <Link to="/wishlist" style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
+          <Link to="/wishlist" style={{ color: '#F5C6C6', display: 'flex', alignItems: 'center' }}>
             <Heart size={20} style={{ cursor: 'pointer' }} />
           </Link>
-          <User size={20} style={{ cursor: 'pointer', color: 'white' }} className="nav-links" />
+          <User size={20} style={{ cursor: 'pointer', color: '#F5C6C6' }} className="nav-links" />
 
           <div className="mobile-only" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
-            {isOpen ? <X size={28} color="white" /> : <Menu size={28} color="white" />}
+            {isOpen ? <X size={28} color="#F5C6C6" /> : <Menu size={28} color="#F5C6C6" />}
           </div>
         </div>
       </nav>
@@ -77,7 +90,7 @@ const Navbar = () => {
               flexDirection: 'column', 
               gap: '1.2rem',
               textAlign: 'left',
-              background: 'rgba(5, 5, 5, 0.95)',
+              background: 'linear-gradient(135deg, #1A1A1A, #3A2E2E)',
               backdropFilter: 'blur(20px)',
               boxShadow: '-10px 0 30px rgba(0,0,0,0.5)'
             }}
@@ -88,13 +101,13 @@ const Navbar = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
               {[
-                { name: 'Home', path: '/', color: 'white' },
-                { name: 'Lips', path: '/category/lips', color: '#FF758F' },
-                { name: 'Face', path: '/category/face-products', color: '#FF9A8B' },
-                { name: 'Eyes', path: '/category/eye-makeup', color: '#B721FF' },
-                { name: 'Skincare', path: '/category/skincare', color: '#84fab0' },
-                { name: 'Live Try-On', path: '/test-model', color: 'white' },
-                { name: 'AI Beauty Assistant', path: '/ai-assistant', color: '#FF758F' }
+                { name: 'Home', path: '/', color: '#F5C6C6' },
+                { name: 'Lips', path: '/category/lips', color: '#F5C6C6' },
+                { name: 'Face', path: '/category/face-products', color: '#F5C6C6' },
+                { name: 'Eyes', path: '/category/eye-makeup', color: '#F5C6C6' },
+                { name: 'Skincare', path: '/category/skincare', color: '#F5C6C6' },
+                { name: 'Live Try-On', path: '/test-model', color: '#F5C6C6' },
+                { name: 'AI Beauty Assistant', path: '/ai-assistant', color: '#F5C6C6' }
               ].map((link, idx) => (
                 <motion.div 
                   key={link.name}
