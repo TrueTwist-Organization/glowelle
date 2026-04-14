@@ -20,11 +20,11 @@ const Home = () => {
   };
 
   return (
-    <div style={{ paddingBottom: '5rem' }} onMouseMove={handleMouseMove}>
+    <div style={{ paddingBottom: '2rem' }} onMouseMove={handleMouseMove}>
       {/* Hero Section */}
       {/* Hero Section */}
       <section style={{ 
-        height: '100vh', 
+        minHeight: '80vh', 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center',
@@ -33,8 +33,7 @@ const Home = () => {
         background: 'transparent',
         position: 'relative',
         overflow: 'hidden',
-        marginBottom: '4rem',
-        padding: '0 2rem',
+        padding: '2rem 1.5rem',
         perspective: '1000px'
       }}>
 
