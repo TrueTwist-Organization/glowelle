@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@400;700;900&family=Urbanist:wght@300;400;600;800;900&display=swap');
+
 :root {
   --primary-makeup: #E63946;
   --secondary-makeup: #FF4D6D;
@@ -9,7 +11,7 @@
   --primary-eye: #B721FF;
   --primary-skincare: #84fab0;
   
-  --bg-gradient: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('../assets/hero-bg.png');
+  --bg-gradient: url('../assets/hero-bg.png');
   --dynamic-bg: var(--bg-gradient);
   --bg-size: cover;
   --bg-pos: center;

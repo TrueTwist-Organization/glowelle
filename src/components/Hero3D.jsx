@@ -117,11 +117,11 @@ const Hero3D = ({ mousePos = { x: 0, y: 0 } }) => {
       left: 0, 
       zIndex: 0, 
       pointerEvents: 'none',
-      opacity: 0.95
+      opacity: 1
     }}>
       <Canvas shadows dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={35} />
-        <Environment preset="night" />
+        <Environment preset="city" />
         
         <ambientLight intensity={0.4} />
         <spotLight position={[10, 10, 10]} angle={0.2} penumbra={1} intensity={1.5} castShadow />

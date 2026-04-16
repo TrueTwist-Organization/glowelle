@@ -189,7 +189,8 @@ const Home = () => {
         </motion.div>
       </section>
 
-      <section className="container" id="categories-section" style={{ marginBottom: 'clamp(5rem, 15vw, 10rem)' }}>
+      <section id="categories-section" style={{ marginBottom: 'clamp(5rem, 15vw, 10rem)', marginTop: '5rem', padding: 'clamp(4rem, 10vw, 6rem) 0', background: 'rgba(0,0,0,0.2)' }}>
+        <div className="container">
          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
             <motion.div
               animate={{ y: [0, -10, 0] }}
@@ -212,11 +213,17 @@ const Home = () => {
             <CategoryCard key={category.id} category={category} />
           ))}
         </div>
+        </div>
       </section>
 
       {/* Featured Collection Section */}
-      <section className="container" id="products-section">
-         <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', marginBottom: '5rem' }}>
+      <section id="products-section" style={{ 
+        position: 'relative', 
+        padding: 'clamp(4rem, 10vw, 6rem) 0',
+        background: 'rgba(0,0,0,0.2)',
+        marginTop: '5rem'
+      }}>
+         <div className="container" style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', marginBottom: '5rem' }}>
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
@@ -239,22 +246,23 @@ const Home = () => {
               style={{ 
                 fontSize: '1.2rem', 
                 textAlign: 'center', 
-                color: 'var(--text-muted)', 
+                color: 'white', 
                 letterSpacing: '0.05em',
                 lineHeight: 1.6,
-                justifyContent: 'center'
+                justifyContent: 'center',
+                opacity: 0.8
               }}
             />
           </div>
         </div>
         
-        <div className="responsive-grid" style={{ 
-          marginTop: '2rem'
-        }}>
-          {/* Displaying a mix of products from different categories */}
-          {Object.entries(products).flatMap(([type, list]) => list.slice(0, 3)).slice(0, 12).map((product) => (
-            <ProductCard key={product.id} product={product} type={product.category?.toLowerCase() === 'skincare' ? 'skincare' : 'makeup'} />
-          ))}
+        <div className="container">
+          <div className="responsive-grid">
+            {/* Displaying a mix of products from different categories */}
+            {Object.entries(products).flatMap(([type, list]) => list.slice(0, 3)).slice(0, 12).map((product) => (
+              <ProductCard key={product.id} product={product} type={product.category?.toLowerCase() === 'skincare' ? 'skincare' : 'makeup'} />
+            ))}
+          </div>
         </div>
       </section>
 

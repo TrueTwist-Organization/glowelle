@@ -43,15 +43,42 @@ const Footer = () => {
         <div className="footer-grid">
           {/* Brand Column */}
           <div className="footer-brand">
-            <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '80px', width: 'auto', marginBottom: '1.2rem', filter: 'drop-shadow(0 0 15px rgba(255,117,143,0.3))' }} />
-            <motion.h2 
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="text-lips" 
-              style={{ fontSize: '2.5rem', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-0.05em' }}
-            >
-              GLOWELLE
-            </motion.h2>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <svg width="240" height="180" viewBox="0 0 250 220" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 15px rgba(255,117,143,0.3))' }}>
+                <defs>
+                  <linearGradient id="goldGradientFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#BF953F" />
+                    <stop offset="50%" stopColor="#FCF6BA" />
+                    <stop offset="100%" stopColor="#B38728" />
+                  </linearGradient>
+                  <linearGradient id="pinkGradientFooter" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#D52A62" />
+                    <stop offset="100%" stopColor="#7E1538" />
+                  </linearGradient>
+                  {/* High clearance flatter curve for footer brand */}
+                  <path id="footerBottomCurve" d="M 35,95 A 120,120 0 0,0 215,95" />
+                </defs>
+
+                <g transform="translate(75, 10)">
+                  <circle cx="50" cy="50" r="45" stroke="url(#goldGradientFooter)" strokeWidth="1.5" fill="none" />
+                  <path d="M 5 50 Q 50 5 95 50" stroke="url(#goldGradientFooter)" strokeWidth="1" fill="none" />
+                  <path d="M 5 50 Q 50 95 95 50" stroke="url(#goldGradientFooter)" strokeWidth="1" fill="none" />
+                  <path d="M 50 5 Q 5 50 50 95" stroke="url(#goldGradientFooter)" strokeWidth="1" fill="none" />
+                  <path d="M 50 5 Q 95 50 50 95" stroke="url(#goldGradientFooter)" strokeWidth="1" fill="none" />
+                  <path d="M 18 18 Q 50 50 82 82 M 18 82 Q 50 50 82 18" stroke="url(#goldGradientFooter)" strokeWidth="0.5" fill="none" />
+                  
+                  <path d="M 50 90 C 35 70, 20 60, 25 45 C 30 30, 45 35, 50 55 C 55 35, 70 30, 75 45 C 80 60, 65 70, 50 90 Z" stroke="url(#pinkGradientFooter)" strokeWidth="2.5" fill="none" />
+                  <path d="M 50 75 C 40 60, 35 45, 40 35 C 45 25, 50 30, 50 45 C 50 30, 55 25, 60 35 C 65 45, 60 60, 50 75 Z" stroke="url(#pinkGradientFooter)" strokeWidth="2.5" fill="none" />
+                  <path d="M 50 55 C 45 45, 45 35, 50 25 C 55 35, 55 45, 50 55 Z" stroke="url(#pinkGradientFooter)" strokeWidth="2.5" fill="none" />
+                </g>
+
+                <text fill="url(#goldGradientFooter)" style={{ fontFamily: "'Cinzel', serif", fontSize: '32px', fontWeight: 600, letterSpacing: '0.15em' }}>
+                  <textPath xlinkHref="#footerBottomCurve" startOffset="50%" textAnchor="middle">
+                    GLOWELLE
+                  </textPath>
+                </text>
+              </svg>
+            </div>
             <motion.p 
               animate={{ y: [0, -3, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}

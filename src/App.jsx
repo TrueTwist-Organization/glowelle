@@ -33,16 +33,15 @@ const ScrollToTop = () => {
   return null;
 };
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
   return (
-    <Router>
-      <CartProvider>
-        <WishlistProvider>
-          <ScrollToTop />
-          <Navbar />
-      <main style={{ minHeight: '100vh', marginTop: '20px' }}>
+    <>
+      <ScrollToTop />
+      <Navbar />
+      <main style={{ minHeight: '100vh', marginTop: '20px', position: 'relative' }}>
         <AnimatePresence mode="wait">
-          <Routes>
+          <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
             <Route path="/category/:categoryId" element={<ProductList />} />
             <Route path="/product/:productId" element={<ProductDetail />} />
@@ -56,13 +55,18 @@ function App() {
           </Routes>
         </AnimatePresence>
       </main>
-
       <FloatingCart />
-
-
-      
       <Footer />
+    </>
+  );
+};
 
+function App() {
+  return (
+    <Router>
+      <CartProvider>
+        <WishlistProvider>
+          <AppContent />
         </WishlistProvider>
       </CartProvider>
     </Router>

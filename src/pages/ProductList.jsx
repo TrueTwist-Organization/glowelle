@@ -39,7 +39,7 @@ const ProductList = () => {
     if (activeCategory?.pageBg) {
       document.documentElement.style.setProperty(
         '--dynamic-bg',
-        `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url(${activeCategory.pageBg})`
+        `url(${activeCategory.pageBg})`
       );
       document.documentElement.style.setProperty('--bg-size', 'cover');
       document.documentElement.style.setProperty('--bg-pos', 'center center');

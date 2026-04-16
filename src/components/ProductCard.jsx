@@ -83,8 +83,8 @@ const ProductCard = ({ product, type }) => {
       layout
       variants={containerVariants}
       initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-50px" }}
+      animate="show"
+      viewport={{ once: true, margin: "-10px" }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => {
         setIsHovering(false);
@@ -99,14 +99,9 @@ const ProductCard = ({ product, type }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: '32px',
-        background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(15px)',
-        WebkitBackdropFilter: 'blur(15px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        background: 'transparent',
         transform: isHovering ? 'translateY(-10px)' : 'translateY(0px)',
-        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: isHovering ? '0 30px 60px rgba(0,0,0,0.3)' : '0 10px 30px rgba(0,0,0,0.1)'
+        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
       <div style={{
@@ -149,6 +144,7 @@ const ProductCard = ({ product, type }) => {
               width: '85%',
               height: '85%',
               objectFit: 'contain',
+              mixBlendMode: 'screen',
               transform: isHovering ? 'scale(1.2)' : 'scale(1)',
               transition: hasFrames && isHovering ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
               filter: isHovering ? 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' : 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'

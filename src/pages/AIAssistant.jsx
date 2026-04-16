@@ -12,6 +12,7 @@ const AIAssistant = () => {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--dynamic-bg', 'var(--bg-gradient)');
@@ -44,32 +45,79 @@ const AIAssistant = () => {
     }
   };
 
-  const startCamera = async () => {
-    setShowCamera(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+  useEffect(() => {
+    let stream = null;
+
+    const initCamera = async () => {
+      if (showCamera) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setCameraError("Your browser doesn't support camera access.");
+          setTimeout(() => {
+            setShowCamera(false);
+            setCameraError(null);
+          }, 3000);
+          return;
+        }
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            } 
+          });
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (err) {
+          console.error("Camera access error:", err);
+          let errorMessage = "Could not access camera.";
+          if (err.name === 'NotAllowedError') errorMessage = "Camera permission denied.";
+          if (err.name === 'NotFoundError') errorMessage = "No camera found on this device.";
+          setCameraError(errorMessage);
+          setTimeout(() => {
+            setShowCamera(false);
+            setCameraError(null);
+          }, 3000);
+        }
       }
-    } catch (err) {
-      console.error("Camera access denied", err);
-      setShowCamera(false);
-    }
+    };
+
+    initCamera();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [showCamera]);
+
+  const startCamera = () => {
+    setCameraError(null);
+    setShowCamera(true);
   };
 
   const capturePhoto = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
-    const dataUrl = canvas.toDataURL('image/png');
-    setImage(dataUrl);
-    setStep(2);
-    // Stop camera stream
-    const stream = videoRef.current.srcObject;
-    const tracks = stream.getTracks();
-    tracks.forEach(track => track.stop());
-    setShowCamera(false);
+    if (!videoRef.current) return;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      
+      // Mirror if using front camera (we applied transform: scaleX(-1) to video)
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      
+      ctx.drawImage(videoRef.current, 0, 0);
+      const dataUrl = canvas.toDataURL('image/png');
+      setImage(dataUrl);
+      setStep(2);
+      setShowCamera(false);
+    } catch (err) {
+      console.error("Error capturing photo:", err);
+    }
   };
 
   const analyzeImage = () => {
@@ -247,17 +295,51 @@ const AIAssistant = () => {
                 style={{
                   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', 
                   zIndex: 2000, display: 'flex', flexDirection: 'column', 
-                  alignItems: 'center', justifyContent: 'center', padding: '2rem'
+                  alignItems: 'center', justifyContent: 'center', padding: '2rem',
+                  backdropFilter: 'blur(20px)'
                 }}
               >
-                <div style={{ position: 'relative', width: '100%', maxWidth: '500px', borderRadius: '30px', overflow: 'hidden', border: '2px solid var(--highlight-pink)' }}>
-                  <video ref={videoRef} autoPlay playsInline style={{ width: '100%', display: 'block' }} />
-                  <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,255,255,0.2)', pointerEvents: 'none', borderRadius: '30px', margin: '20px' }}></div>
+                <div style={{ position: 'relative', width: '100%', maxWidth: '500px', borderRadius: '40px', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.1)', boxShadow: '0 0 50px rgba(0,0,0,0.5)' }}>
+                  {cameraError ? (
+                    <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'rgba(255,50,50,0.1)' }}>
+                      <RefreshCw size={48} className="text-lips" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+                      <h3 style={{ marginBottom: '1rem' }}>Camera Error</h3>
+                      <p style={{ opacity: 0.7 }}>{cameraError}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <video 
+                        ref={videoRef} 
+                        autoPlay 
+                        playsInline 
+                        muted
+                        style={{ width: '100%', display: 'block', transform: 'scaleX(-1)' }} 
+                      />
+                      <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(255,255,255,0.2)', pointerEvents: 'none', borderRadius: '40px', margin: '15px' }}></div>
+                      <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.5)', padding: '0.5rem 1rem', borderRadius: '10px', backdropFilter: 'blur(10px)', fontSize: '0.8rem', opacity: 0.7 }}>
+                        Center your face in the frame
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div style={{ marginTop: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', width: '100%' }}>
-                  <button className="btn btn-secondary" style={{ flex: '1 1 120px' }} onClick={() => setShowCamera(false)}>Cancel</button>
-                  <button className="btn btn-primary" style={{ flex: '1 1 120px' }} onClick={capturePhoto}>Capture ✨</button>
-                </div>
+                {!cameraError && (
+                  <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1.5rem', justifyContent: 'center', width: '100%', maxWidth: '400px' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ flex: 1, borderRadius: '20px' }} 
+                      onClick={() => setShowCamera(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ flex: 1, borderRadius: '20px', background: 'var(--highlight-pink)', color: 'white' }} 
+                      onClick={capturePhoto}
+                    >
+                      Capture ✨
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
           </motion.div>

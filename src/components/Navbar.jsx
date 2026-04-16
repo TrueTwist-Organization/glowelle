@@ -33,9 +33,66 @@ const Navbar = () => {
         transition: 'all 0.4s ease',
         pointerEvents: 'none' // Allow clicks to pass through transparent areas
       }}>
-        <div style={{ pointerEvents: 'auto', display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <img src="/logo.png" alt="GLOWELLE Logo" style={{ height: '50px', width: 'auto', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.8))' }} />
+        <div className="navbar-inner" style={{ 
+          pointerEvents: 'auto', 
+          display: 'flex', 
+          width: '100%', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          gap: '1rem' 
+        }}>
+          <Link to="/" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            textDecoration: 'none',
+            flexShrink: 0,
+            marginLeft: '-10px' // Pull closer to edge if needed
+          }}>
+            <svg 
+              className="logo-svg"
+              width="180" 
+              height="100" 
+              viewBox="0 0 250 180" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg" 
+              style={{ 
+                filter: 'drop-shadow(0 0 20px rgba(0,0,0,0.8)) drop-shadow(0 0 5px rgba(0,0,0,1))',
+                maxWidth: '160px', // Slightly larger for better visibility
+                height: 'auto'
+              }}
+            >
+              <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#BF953F" />
+                  <stop offset="50%" stopColor="#FCF6BA" />
+                  <stop offset="100%" stopColor="#B38728" />
+                </linearGradient>
+                <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#D52A62" />
+                  <stop offset="100%" stopColor="#7E1538" />
+                </linearGradient>
+                <path id="bottomCurve" d="M 35,95 A 120,120 0 0,0 215,95" />
+              </defs>
+
+              <g transform="translate(75, 10)">
+                <circle cx="50" cy="50" r="45" stroke="url(#goldGradient)" strokeWidth="2.5" fill="none" />
+                <path d="M 5 50 Q 50 5 95 50" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+                <path d="M 5 50 Q 50 95 95 50" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+                <path d="M 50 5 Q 5 50 50 95" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+                <path d="M 50 5 Q 95 50 50 95" stroke="url(#goldGradient)" strokeWidth="2" fill="none" />
+                <path d="M 18 18 Q 50 50 82 82 M 18 82 Q 50 50 82 18" stroke="url(#goldGradient)" strokeWidth="1" fill="none" />
+                
+                <path d="M 50 90 C 35 70, 20 60, 25 45 C 30 30, 45 35, 50 55 C 55 35, 70 30, 75 45 C 80 60, 65 70, 50 90 Z" stroke="url(#pinkGradient)" strokeWidth="3.5" fill="none" />
+                <path d="M 50 75 C 40 60, 35 45, 40 35 C 45 25, 50 30, 50 45 C 50 30, 55 25, 60 35 C 65 45, 60 60, 50 75 Z" stroke="url(#pinkGradient)" strokeWidth="3.5" fill="none" />
+                <path d="M 50 55 C 45 45, 45 35, 50 25 C 55 35, 55 45, 50 55 Z" stroke="url(#pinkGradient)" strokeWidth="3.5" fill="none" />
+              </g>
+
+              <text fill="url(#goldGradient)" stroke="rgba(0,0,0,0.3)" strokeWidth="0.5" style={{ fontFamily: "'Cinzel', serif", fontSize: '30px', fontWeight: 900, letterSpacing: '0.18em' }}>
+                <textPath xlinkHref="#bottomCurve" startOffset="50%" textAnchor="middle">
+                  GLOWELLE
+                </textPath>
+              </text>
+            </svg>
           </Link>
 
         {/* Desktop Links */}
