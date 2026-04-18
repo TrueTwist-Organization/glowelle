@@ -125,8 +125,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
       formData.append('eyeshadow_color', eyeshadowColor);
       formData.append('blush_color', blushColor);
       formData.append('mode', mode);
-
-      await fetch("https://jinalpatel.n8n.cloud/webhook/lipstick-tryon", {
+      await fetch("https://jinalpatel.app.n8n.cloud/webhook/lipstick-tryon", {
         method: "POST",
         body: formData
       });
