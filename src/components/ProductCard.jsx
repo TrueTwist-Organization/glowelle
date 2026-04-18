@@ -5,40 +5,44 @@ import { useNavigate } from 'react-router-dom';
 // Returns gradient colors based on product category
 const getCategoryStyle = (category = '', type = '') => {
   const cat = (category + type).toLowerCase();
+  
+  // Defaulting to the requested premium gold color #D6B25E for all products
+  const primaryGold = '#D6B25E';
+  
   if (cat.includes('lip') || cat.includes('lipstick') || cat.includes('liquid lip'))
     return {
-      nameColor: 'linear-gradient(90deg, #FF1F6D, #FF758F)',
-      priceColor: '#FF4D6D',
+      nameColor: primaryGold,
+      priceColor: primaryGold,
       badgeColor: '#FF758F',
-      glow: 'rgba(255, 31, 109, 0.4)'
+      glow: 'rgba(214, 178, 94, 0.4)'
     };
   if (cat.includes('face') || cat.includes('foundation') || cat.includes('primer') || cat.includes('compact') || cat.includes('powder') || cat.includes('blush') || cat.includes('concealer') || cat.includes('highlighter'))
     return {
-      nameColor: 'linear-gradient(135deg, #FFD700, #FF9A8B, #FFD6C0)',
-      priceColor: '#FFD700',
+      nameColor: primaryGold,
+      priceColor: primaryGold,
       badgeColor: '#FFD700',
-      glow: 'rgba(255, 215, 0, 0.4)'
+      glow: 'rgba(214, 178, 94, 0.4)'
     };
   if (cat.includes('eye') || cat.includes('mascara') || cat.includes('eyeliner') || cat.includes('eyebrow') || cat.includes('brow') || cat.includes('shadow') || cat.includes('palette'))
     return {
-      nameColor: 'linear-gradient(90deg, #B721FF, #21D4FD)',
-      priceColor: '#B721FF',
+      nameColor: primaryGold,
+      priceColor: primaryGold,
       badgeColor: '#21D4FD',
-      glow: 'rgba(183, 33, 255, 0.4)'
+      glow: 'rgba(214, 178, 94, 0.4)'
     };
   if (cat.includes('skin') || cat.includes('serum') || cat.includes('mist') || cat.includes('cream') || cat.includes('sunscreen'))
     return {
-      nameColor: 'linear-gradient(90deg, #84fab0, #8fd3f4, #50C878)',
-      priceColor: '#50C878',
+      nameColor: primaryGold,
+      priceColor: primaryGold,
       badgeColor: '#84fab0',
-      glow: 'rgba(80, 200, 120, 0.4)'
+      glow: 'rgba(214, 178, 94, 0.4)'
     };
-  // default royal luxury pink/gold
+    
   return {
-    nameColor: 'linear-gradient(90deg, #FF758F, #FFB3C1, #FFD700)',
-    priceColor: '#FF758F',
-    badgeColor: '#FF758F',
-    glow: 'rgba(255, 117, 143, 0.4)'
+    nameColor: primaryGold,
+    priceColor: primaryGold,
+    badgeColor: primaryGold,
+    glow: 'rgba(214, 178, 94, 0.4)'
   };
 };
 
@@ -191,10 +195,7 @@ const ProductCard = ({ product, type }) => {
             marginBottom: '0.4rem',
             textAlign: 'center',
             fontWeight: 900,
-            background: style.nameColor,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            color: style.nameColor,
             transition: 'all 0.3s ease',
             textShadow: isHovering ? `0 0 15px ${style.glow}` : 'none'
           }}
