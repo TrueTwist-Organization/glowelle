@@ -6,43 +6,43 @@ import { useNavigate } from 'react-router-dom';
 const getCategoryStyle = (category = '', type = '') => {
   const cat = (category + type).toLowerCase();
   
-  // Defaulting to the requested dark chocolate color #3B2A1F for all products
-  const primaryColor = '#3B2A1F';
+  // Defaulting to the requested charcoal color #2E2A28 for all products
+  const primaryColor = '#2E2A28';
   
   if (cat.includes('lip') || cat.includes('lipstick') || cat.includes('liquid lip'))
     return {
       nameColor: primaryColor,
       priceColor: primaryColor,
       badgeColor: '#FF758F',
-      glow: 'rgba(59, 42, 31, 1)'
+      glow: 'rgba(46, 42, 40, 0.4)'
     };
   if (cat.includes('face') || cat.includes('foundation') || cat.includes('primer') || cat.includes('compact') || cat.includes('powder') || cat.includes('blush') || cat.includes('concealer') || cat.includes('highlighter'))
     return {
       nameColor: primaryColor,
       priceColor: primaryColor,
       badgeColor: '#FFD700',
-      glow: 'rgba(59, 42, 31, 1)'
+      glow: 'rgba(46, 42, 40, 0.4)'
     };
   if (cat.includes('eye') || cat.includes('mascara') || cat.includes('eyeliner') || cat.includes('eyebrow') || cat.includes('brow') || cat.includes('shadow') || cat.includes('palette'))
     return {
       nameColor: primaryColor,
       priceColor: primaryColor,
       badgeColor: '#21D4FD',
-      glow: 'rgba(59, 42, 31, 1)'
+      glow: 'rgba(46, 42, 40, 0.4)'
     };
   if (cat.includes('skin') || cat.includes('serum') || cat.includes('mist') || cat.includes('cream') || cat.includes('sunscreen'))
     return {
       nameColor: primaryColor,
       priceColor: primaryColor,
       badgeColor: '#84fab0',
-      glow: 'rgba(59, 42, 31, 1)'
+      glow: 'rgba(46, 42, 40, 0.4)'
     };
     
   return {
     nameColor: primaryColor,
     priceColor: primaryColor,
     badgeColor: primaryColor,
-    glow: 'rgba(59, 42, 31, 1)'
+    glow: 'rgba(46, 42, 40, 0.4)'
   };
 };
 
