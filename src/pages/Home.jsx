@@ -199,11 +199,12 @@ const Home = () => {
               <WaveText 
                 text="Shop By Category" 
                 style={{ 
-                  fontSize: 'clamp(2rem, 10vw, 3.5rem)', 
-                  fontWeight: 900, 
+                  fontSize: 'clamp(2rem, 10vw, 4rem)', 
+                  fontWeight: 950, 
                   textAlign: 'center',
-                  color: 'var(--highlight-pink)',
-                  textShadow: '0 0 20px rgba(255, 117, 143, 0.3)'
+                  color: '#FF758F',
+                  textShadow: '0 0 30px rgba(255, 117, 143, 0.6)',
+                  letterSpacing: '0.05em'
                 }} 
               />
             </motion.div>
@@ -231,28 +232,30 @@ const Home = () => {
             <WaveText 
               text="Featured Collection" 
               style={{ 
-                fontSize: 'clamp(2rem, 12vw, 4rem)', 
+                fontSize: 'clamp(2rem, 12vw, 5rem)', 
                 fontWeight: 950, 
                 textAlign: 'center', 
                 marginBottom: '1rem',
-                color: 'var(--primary-face)',
-                textShadow: '0 0 25px rgba(255, 154, 139, 0.3)'
+                color: '#FFB3C1',
+                textShadow: '0 0 50px rgba(255, 154, 139, 0.8), 0 0 20px rgba(255, 154, 139, 0.4)',
+                letterSpacing: '-0.02em'
               }} 
             />
           </motion.div>
-          <div style={{ maxWidth: '600px', display: 'flex', justifyContent: 'center' }}>
-            <WaveText 
-              text="Elevate your beauty routine with our most-loved products. Meticulously crafted for perfection."
+          <div style={{ maxWidth: '800px', display: 'flex', justifyContent: 'center' }}>
+            <p
               style={{ 
-                fontSize: '1.2rem', 
+                fontSize: '1.25rem', 
                 textAlign: 'center', 
-                color: 'white', 
-                letterSpacing: '0.05em',
-                lineHeight: 1.6,
-                justifyContent: 'center',
-                opacity: 0.8
+                color: 'rgba(255, 255, 255, 0.9)', 
+                letterSpacing: '0.08em',
+                lineHeight: 1.8,
+                fontWeight: 500,
+                textTransform: 'uppercase'
               }}
-            />
+            >
+              Elevate your beauty routine with our most-loved products. <span style={{ color: '#FFD700', fontWeight: 900 }}>Meticulously crafted</span> for perfection.
+            </p>
           </div>
         </div>
         

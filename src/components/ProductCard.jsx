@@ -7,33 +7,38 @@ const getCategoryStyle = (category = '', type = '') => {
   const cat = (category + type).toLowerCase();
   if (cat.includes('lip') || cat.includes('lipstick') || cat.includes('liquid lip'))
     return {
-      nameColor: 'linear-gradient(90deg, #FF4D6D, #FF758F)',
+      nameColor: 'linear-gradient(90deg, #FF1F6D, #FF758F)',
       priceColor: '#FF4D6D',
       badgeColor: '#FF758F',
+      glow: 'rgba(255, 31, 109, 0.4)'
     };
   if (cat.includes('face') || cat.includes('foundation') || cat.includes('primer') || cat.includes('compact') || cat.includes('powder') || cat.includes('blush') || cat.includes('concealer') || cat.includes('highlighter'))
     return {
-      nameColor: 'linear-gradient(90deg, #FF9A8B, #FFD6C0)',
-      priceColor: '#FF9A8B',
-      badgeColor: '#FF9A8B',
+      nameColor: 'linear-gradient(135deg, #FFD700, #FF9A8B, #FFD6C0)',
+      priceColor: '#FFD700',
+      badgeColor: '#FFD700',
+      glow: 'rgba(255, 215, 0, 0.4)'
     };
   if (cat.includes('eye') || cat.includes('mascara') || cat.includes('eyeliner') || cat.includes('eyebrow') || cat.includes('brow') || cat.includes('shadow') || cat.includes('palette'))
     return {
       nameColor: 'linear-gradient(90deg, #B721FF, #21D4FD)',
       priceColor: '#B721FF',
       badgeColor: '#21D4FD',
+      glow: 'rgba(183, 33, 255, 0.4)'
     };
   if (cat.includes('skin') || cat.includes('serum') || cat.includes('mist') || cat.includes('cream') || cat.includes('sunscreen'))
     return {
-      nameColor: 'linear-gradient(90deg, #84fab0, #8fd3f4)',
-      priceColor: '#84fab0',
-      badgeColor: '#8fd3f4',
+      nameColor: 'linear-gradient(90deg, #84fab0, #8fd3f4, #50C878)',
+      priceColor: '#50C878',
+      badgeColor: '#84fab0',
+      glow: 'rgba(80, 200, 120, 0.4)'
     };
-  // default pink
+  // default royal luxury pink/gold
   return {
-    nameColor: 'linear-gradient(90deg, #FF758F, #FFB3C1)',
+    nameColor: 'linear-gradient(90deg, #FF758F, #FFB3C1, #FFD700)',
     priceColor: '#FF758F',
     badgeColor: '#FF758F',
+    glow: 'rgba(255, 117, 143, 0.4)'
   };
 };
 
@@ -186,8 +191,12 @@ const ProductCard = ({ product, type }) => {
             marginBottom: '0.4rem',
             textAlign: 'center',
             fontWeight: 900,
-            color: style.priceColor,
-            transition: 'all 0.3s ease'
+            background: style.nameColor,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            transition: 'all 0.3s ease',
+            textShadow: isHovering ? `0 0 15px ${style.glow}` : 'none'
           }}
         >
           {product.name}
@@ -205,7 +214,8 @@ const ProductCard = ({ product, type }) => {
             fontWeight: 800,
             color: style.priceColor,
             opacity: 1,
-            filter: `drop-shadow(0 0 8px ${style.priceColor}50)`
+            filter: `drop-shadow(0 0 12px ${style.priceColor}80)`,
+            letterSpacing: '0.05em'
           }}
         >
           {product.price || "₹45.00"}
