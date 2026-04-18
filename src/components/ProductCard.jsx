@@ -6,43 +6,43 @@ import { useNavigate } from 'react-router-dom';
 const getCategoryStyle = (category = '', type = '') => {
   const cat = (category + type).toLowerCase();
   
-  // Defaulting to the requested premium gold color #D6B25E for all products
-  const primaryGold = '#D6B25E';
+  // Defaulting to the requested dark chocolate color #3B2A1F for all products
+  const primaryColor = '#3B2A1F';
   
   if (cat.includes('lip') || cat.includes('lipstick') || cat.includes('liquid lip'))
     return {
-      nameColor: primaryGold,
-      priceColor: primaryGold,
+      nameColor: primaryColor,
+      priceColor: primaryColor,
       badgeColor: '#FF758F',
-      glow: 'rgba(214, 178, 94, 0.4)'
+      glow: 'rgba(59, 42, 31, 1)'
     };
   if (cat.includes('face') || cat.includes('foundation') || cat.includes('primer') || cat.includes('compact') || cat.includes('powder') || cat.includes('blush') || cat.includes('concealer') || cat.includes('highlighter'))
     return {
-      nameColor: primaryGold,
-      priceColor: primaryGold,
+      nameColor: primaryColor,
+      priceColor: primaryColor,
       badgeColor: '#FFD700',
-      glow: 'rgba(214, 178, 94, 0.4)'
+      glow: 'rgba(59, 42, 31, 1)'
     };
   if (cat.includes('eye') || cat.includes('mascara') || cat.includes('eyeliner') || cat.includes('eyebrow') || cat.includes('brow') || cat.includes('shadow') || cat.includes('palette'))
     return {
-      nameColor: primaryGold,
-      priceColor: primaryGold,
+      nameColor: primaryColor,
+      priceColor: primaryColor,
       badgeColor: '#21D4FD',
-      glow: 'rgba(214, 178, 94, 0.4)'
+      glow: 'rgba(59, 42, 31, 1)'
     };
   if (cat.includes('skin') || cat.includes('serum') || cat.includes('mist') || cat.includes('cream') || cat.includes('sunscreen'))
     return {
-      nameColor: primaryGold,
-      priceColor: primaryGold,
+      nameColor: primaryColor,
+      priceColor: primaryColor,
       badgeColor: '#84fab0',
-      glow: 'rgba(214, 178, 94, 0.4)'
+      glow: 'rgba(59, 42, 31, 1)'
     };
     
   return {
-    nameColor: primaryGold,
-    priceColor: primaryGold,
-    badgeColor: primaryGold,
-    glow: 'rgba(214, 178, 94, 0.4)'
+    nameColor: primaryColor,
+    priceColor: primaryColor,
+    badgeColor: primaryColor,
+    glow: 'rgba(59, 42, 31, 1)'
   };
 };
 
