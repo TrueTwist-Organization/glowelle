@@ -111,13 +111,16 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
       setIsLoading(true);
       const formData = new FormData();
       
-      // Convert current image (DataURL) to Blob for the webhook
-      if (image && image.startsWith('data:')) {
-        const res = await fetch(image);
+      // Get the current face data (either the static image or a fresh camera capture)
+      const currentSource = mode === 'camera' ? webcamRef.current?.getScreenshot() : image;
+      
+      // Convert to Blob for the webhook
+      if (currentSource && currentSource.startsWith('data:')) {
+        const res = await fetch(currentSource);
         const blob = await res.blob();
         formData.append('image', blob, 'user_capture.jpg');
       } else {
-        formData.append('image_url', image);
+        formData.append('image_url', currentSource);
       }
       
       formData.append('lipstick_color', lipstickColor);
