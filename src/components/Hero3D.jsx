@@ -119,7 +119,7 @@ const Hero3D = ({ mousePos = { x: 0, y: 0 } }) => {
       pointerEvents: 'none',
       opacity: 1
     }}>
-      <Canvas shadows dpr={[1, 2]}>
+      <Canvas shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={35} />
         <Environment preset="city" />
         

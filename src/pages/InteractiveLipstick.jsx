@@ -136,7 +136,7 @@ const InteractiveLipstick = () => {
         left: 0,
         zIndex: 10
       }}>
-        <Canvas shadows dpr={[1, 2]}>
+        <Canvas shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]}>
           <PerspectiveCamera makeDefault position={[0, 1, 8.5]} fov={30} />
           <Environment preset="studio" />
           

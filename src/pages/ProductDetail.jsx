@@ -15,8 +15,6 @@ const ProductDetail = () => {
   const [addedToCart, setAddedToCart] = useState(false);
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const videoRef = React.useRef(null);
-
 
   const categoryBg = React.useMemo(() => {
     if (!product) return null;
@@ -35,18 +33,6 @@ const ProductDetail = () => {
     });
     setProduct(foundProduct);
   }, [productId]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (videoRef.current && product?.video) {
-        const scrollPosition = window.scrollY;
-        const speed = 0.005; // Adjust playback speed
-        videoRef.current.currentTime = scrollPosition * speed % videoRef.current.duration;
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [product]);
 
   const handleWishlist = () => {
     if (product) toggleWishlist(product);
@@ -91,6 +77,8 @@ const ProductDetail = () => {
     };
   }, [categoryBg]);
 
+
+
   if (!product) return (
     <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
       <h2>Product not found</h2>
@@ -99,21 +87,14 @@ const ProductDetail = () => {
   );
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: 'transparent' }}>
-      {/* Background Video for specific products */}
-      {product.video && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, overflow: 'hidden' }}>
-          <video 
-            ref={videoRef}
-            muted 
-            playsInline
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 1 }}
-          >
-            <source src={product.video} type="video/mp4" />
-          </video>
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'transparent' }}></div>
-        </div>
-      )}
+    <div style={{ 
+      position: 'relative', 
+      minHeight: '100vh', 
+      background: 'var(--dynamic-bg)', 
+      backgroundSize: 'cover', 
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
 
       <div className="container" style={{ position: 'relative', zIndex: 1, paddingTop: '2rem', paddingBottom: '4rem' }}>
         <motion.button 
@@ -157,17 +138,12 @@ const ProductDetail = () => {
         }}>
           {/* Product Image Section */}
           <motion.div
-             initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+             initial={{ opacity: 0 }}
              animate={{ 
-               opacity: 1, 
-               scale: 1, 
-               rotate: 360 
+               opacity: 1
              }}
              transition={{ 
-               duration: 1.5,
-               rotate: { duration: 12, repeat: Infinity, ease: "linear" },
-               scale: { duration: 1.2 },
-               opacity: { duration: 1 }
+               duration: 1
              }}
              style={{
               padding: '2rem',
@@ -180,7 +156,15 @@ const ProductDetail = () => {
             }}
           >
             <motion.img 
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 1.2 }}
+              animate={{ 
+                scale: [1, 1.12, 1],
+              }}
+              transition={{ 
+                scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                default: { type: 'spring', stiffness: 300, damping: 20 }
+              }}
               src={product.image} 
               alt={product.name} 
               style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))' }}
@@ -205,7 +189,7 @@ const ProductDetail = () => {
               {product.category}
             </div>
 
-            <h1 style={{ fontSize: 'clamp(2rem, 10vw, 3.5rem)', fontWeight: 900, marginBottom: '1rem', lineHeight: 1.1 }}>{product.name}</h1>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 8vw, 3.5rem)', fontWeight: 900, marginBottom: '1rem', lineHeight: 1.1 }}>{product.name}</h1>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '1.1rem' }}>
@@ -216,7 +200,7 @@ const ProductDetail = () => {
                <div style={{ color: '#22c55e', fontWeight: 700 }}>In Stock</div>
             </div>
 
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary-makeup)', marginBottom: '2.5rem' }}>
+            <div style={{ fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: 900, color: 'var(--primary-makeup)', marginBottom: '2.5rem' }}>
                {product.price}
             </div>
 
@@ -226,42 +210,108 @@ const ProductDetail = () => {
 
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 'clamp(1rem, 5vw, 2.5rem)', alignItems: 'center', flexWrap: 'wrap' }}>
                <div style={{ 
                  display: 'flex', 
                  alignItems: 'center', 
-                 gap: '1.5rem', 
-                 padding: '0.8rem 0',
+                 gap: '1rem', 
+                 padding: '0.6rem 0',
                  borderBottom: '1px solid #eee'
                }}>
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', cursor: 'pointer' }}>-</button>
-                  <span style={{ fontWeight: 800, fontSize: '1.5rem' }}>{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} style={{ border: 'none', background: 'transparent', fontSize: '1.5rem', cursor: 'pointer' }}>+</button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>-</button>
+                  <span style={{ fontWeight: 800, fontSize: '1.2rem' }}>{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} style={{ border: 'none', background: 'transparent', fontSize: '1.2rem', cursor: 'pointer' }}>+</button>
                </div>
                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                  <button 
-                    onClick={handleAddToCart} 
-                    style={{ 
-                      flex: 1,
-                      minWidth: '200px',
-                      background: addedToCart ? '#22c55e' : 'transparent', 
-                      border: '2px solid var(--primary-makeup)', 
-                      color: addedToCart ? 'white' : 'var(--primary-makeup)', 
-                      fontSize: '1.1rem', 
-                      fontWeight: 800, 
-                      cursor: 'pointer', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      gap: '0.8rem',
-                      padding: '0.8rem 1.5rem',
-                      borderRadius: '100px',
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {addedToCart ? 'ADDED!' : 'ADD TO CART'} <ShoppingCart size={22} />
-                  </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+                    <button 
+                      onClick={handleAddToCart} 
+                      style={{ 
+                        flex: 1,
+                        background: addedToCart ? '#22c55e' : 'transparent', 
+                        border: '2px solid var(--primary-makeup)', 
+                        color: addedToCart ? 'white' : 'var(--primary-makeup)', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 800, 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        gap: '0.8rem',
+                        padding: '0.8rem 1.5rem',
+                        borderRadius: '100px',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {addedToCart ? 'ADDED!' : 'ADD TO CART'} <ShoppingCart size={22} />
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        let hex = '#FF1493'; 
+                        let tab = 'lips';
+
+                        // Exact mapping by product ID
+                        const idMap = {
+                          // Lips
+                          4: { tab: 'lips', hex: '#D2A679' }, // Soft Beige
+                          5: { tab: 'lips', hex: '#C19A6B' }, // Nude Shade
+                          6: { tab: 'lips', hex: '#8B0000' }, // Black Tube (Bold Red)
+                          7: { tab: 'lips', hex: '#FF2400' }, // Red Smudge
+                          8: { tab: 'lips', hex: '#DC143C' }, // Red Case
+                          10: { tab: 'lips', hex: '#FF7F50' }, // Coral Shade
+                          11: { tab: 'lips', hex: '#E3BC9A' }, // Nude Lipstick
+                          12: { tab: 'lips', hex: '#B87333' }, // Metallic Lipstick
+                          13: { tab: 'lips', hex: '#FF69B4' }, // Pink Case
+                          17: { tab: 'lips', hex: '#B76E79' }, // Rose Gold
+                          // Face
+                          2: { tab: 'face', hex: '#FFE0C4' }, // Primer
+                          3: { tab: 'face', hex: '#E4B594' }, // Liquid Foundation
+                          16: { tab: 'face', hex: '#F5CBAC' }, // Compact Powder
+                          18: { tab: 'face', hex: '#D5A17A' }, // Glow Radiance Foundation
+                          19: { tab: 'face', hex: '#FCD6B9' }, // Silk Touch Compact
+                          20: { tab: 'face', hex: '#C68E63' }, // HD Concealer
+                          21: { tab: 'face', hex: '#FF80AB' }, // Blush Bloom
+                          22: { tab: 'face', hex: '#FFFACD' }, // Highlighter
+                          // Eyes
+                          1: { tab: 'eyes', hex: '#3E2723' }, // Eyebrow pencil
+                          14: { tab: 'eyes', hex: '#40E0D0' }, // Turquoise Mascara
+                          15: { tab: 'eyes', hex: '#000000' }, // Eyeliner
+                          23: { tab: 'eyes', hex: '#4A4A4A' }, // Smokey Eyeshadow
+                          24: { tab: 'eyes', hex: '#000000' }, // Volume Mascara
+                          25: { tab: 'eyes', hex: '#000000' }, // Precision Eyeliner
+                          26: { tab: 'eyes', hex: '#4E342E' }  // Brow Sculpt
+                        };
+
+                        if (idMap[product.id]) {
+                          tab = idMap[product.id].tab;
+                          hex = idMap[product.id].hex;
+                        }
+
+                        navigate('/test-model', { state: { autoTryOn: true, tab, hex } });
+                      }}
+                      style={{ 
+                        flex: 1,
+                        background: 'var(--primary-makeup)', 
+                        border: 'none', 
+                        color: 'white', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 800, 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        gap: '0.8rem',
+                        padding: '0.8rem 1.5rem',
+                        borderRadius: '100px',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 8px 20px rgba(255,20,147,0.3)'
+                      }}
+                    >
+                      VIRTUAL TRY-ON
+                    </button>
+                  </div>
 
                   <div style={{ display: 'flex', gap: '1rem', borderLeft: '1px solid #eee', paddingLeft: '1.5rem' }}>
                     <motion.div 

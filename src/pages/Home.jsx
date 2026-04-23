@@ -3,13 +3,15 @@ import { motion } from 'framer-motion';
 import { categories, products } from '../data/products';
 import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
-import { Sparkles, Heart } from 'lucide-react';
+import { Sparkles, Heart, Camera, Cpu, Zap } from 'lucide-react';
 
 import Hero3D from '../components/Hero3D';
 import WaveText from '../components/WaveText';
 
 const Home = () => {
   const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+  const [sectionBg, setSectionBg] = React.useState("https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=2000&auto=format&fit=crop");
+  const [sliderPos, setSliderPos] = React.useState(50);
   
   const handleMouseMove = (e) => {
     const { clientX, clientY } = e;
@@ -217,6 +219,162 @@ const Home = () => {
         </div>
       </section>
 
+      {/* AI Studio Feature Section */}
+      <section style={{ 
+        padding: 'clamp(4rem, 12vw, 8rem) 0', 
+        background: 'transparent',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.03)', 
+              padding: 'clamp(2rem, 8vw, 5rem) clamp(1rem, 5vw, 4rem)', 
+              borderRadius: '60px', 
+              backdropFilter: 'blur(30px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.3)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div className="badge" style={{ background: 'rgba(255, 117, 143, 0.3)', border: '1px solid rgba(255, 117, 143, 0.6)', color: 'white', marginBottom: '2.5rem', display: 'inline-block', fontWeight: 900, letterSpacing: '0.1em' }}>NEURAL STUDIO V.2</div>
+            <h2 style={{ 
+              fontSize: 'clamp(3rem, 12vw, 6.5rem)', 
+              fontWeight: 950, 
+              marginBottom: '3.5rem', 
+              lineHeight: 1, 
+              background: 'linear-gradient(90deg, #FF758F, #FF1493, #FFB3C1, #FF758F)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.04em',
+              textShadow: '0 0 30px rgba(255,117,143,0.3)'
+            }}>
+              TRY ON
+            </h2>
+
+            {/* Premium Before/After Comparison Slider */}
+            <div style={{ 
+              position: 'relative', 
+              width: '100%', 
+              maxWidth: '550px', 
+              margin: '0 auto 4rem', 
+              borderRadius: '40px', 
+              overflow: 'hidden',
+              aspectRatio: '1/1',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+              border: '4px solid rgba(255,255,255,0.05)',
+              cursor: 'ew-resize'
+            }}>
+              {/* After Image (Full width, absolute) */}
+              <img 
+                src="/assets/after.png" 
+                alt="After" 
+                style={{ 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '550px', 
+                  height: '550px', 
+                  objectFit: 'cover' 
+                }}
+              />
+              
+              {/* Before Image (Clipped overlay) */}
+              <div style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                width: `${sliderPos}%`, 
+                height: '100%', 
+                overflow: 'hidden',
+                borderRight: '3px solid white',
+                zIndex: 2,
+                pointerEvents: 'none'
+              }}>
+                <img 
+                  src="/assets/before.png" 
+                  alt="Before" 
+                  style={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '550px', 
+                    height: '550px', 
+                    objectFit: 'cover',
+                    maxWidth: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Invisible Slider Input for Control */}
+              <input 
+                type="range" 
+                min="0" max="100" 
+                value={sliderPos}
+                onChange={(e) => setSliderPos(e.target.value)}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0,
+                  cursor: 'ew-resize',
+                  zIndex: 10
+                }}
+              />
+
+              {/* High-End Labels */}
+              <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em' }}>BEFORE</div>
+              <div style={{ position: 'absolute', top: '20px', right: '20px', background: 'var(--primary-makeup)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em' }}>AFTER</div>
+              
+              {/* Center Handle Indicator */}
+              <div style={{ 
+                position: 'absolute', 
+                left: `${sliderPos}%`, 
+                top: '50%', 
+                transform: 'translate(-50%, -50%)', 
+                width: '40px', 
+                height: '40px', 
+                background: 'white', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+                pointerEvents: 'none',
+                zIndex: 5
+              }}>
+                <div style={{ width: '12px', height: '2px', background: '#333', borderRadius: '2px' }} />
+              </div>
+            </div>
+            
+            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.3rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: '4rem', fontWeight: 500, maxWidth: '700px', margin: '0 auto 4rem' }}>
+              Witness the power of precision. Our neural engine understands every curve of your face for a flawless transformation.
+            </p>
+
+            <div className="premium-button-wrap" style={{ margin: '0 auto' }}>
+              <button 
+                className="premium-button-inner"
+                onClick={() => window.location.href='/test-model'}
+                style={{ fontSize: '1.2rem', padding: '1.4rem 4rem' }}
+              >
+                OPEN AI STUDIO
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Featured Collection Section */}
+
       {/* Featured Collection Section */}
       <section id="products-section" style={{ 
         position: 'relative', 
@@ -270,8 +428,15 @@ const Home = () => {
       </section>
 
       {/* Featured Section */}
-      <section style={{ marginTop: 'clamp(5rem, 15vw, 10rem)', padding: 'clamp(4rem, 10vw, 8rem) 0', background: 'rgba(0,0,0,0.2)' }}>
-         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '6rem', alignItems: 'center' }}>
+      <section style={{ 
+        marginTop: 'clamp(5rem, 15vw, 10rem)', 
+        padding: 'clamp(4rem, 10vw, 8rem) 0', 
+        background: 'rgba(0, 0, 0, 0.15)',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+        border: 'none'
+      }}>
+         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(2rem, 8vw, 6rem)', alignItems: 'center' }}>
             <div>
                <h2 style={{ fontSize: '3.5rem', marginBottom: '2.5rem', fontWeight: 900 }}>Why <span style={{ background: 'linear-gradient(90deg, #FFB3C1, #FF758F)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Glowelle?</span></h2>
                <div style={{ display: 'grid', gap: '2.5rem' }}>

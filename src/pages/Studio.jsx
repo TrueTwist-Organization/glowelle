@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { useDropzone } from 'react-dropzone';
 import * as faceapi from '@vladmandic/face-api';
@@ -76,23 +77,28 @@ const DraggablePin = ({ x, y, onDrag, color, hidden }) => {
   );
 };
 
-const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
+const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig }) => {
   const [mode, setMode] = useState(initialMode);
   const [image, setImage] = useState(initialImage);
-  const [activeTab, setActiveTab] = useState('lips');
-  const [eyeshadowColor, setEyeshadowColor] = useState('#673147'); // Default earth tone
-  const [blushColor, setBlushColor] = useState('#ff8a80');
+  const [sourceImage, setSourceImage] = useState(initialImage); // Track original image for multiple try-ons
+  const [activeTab, setActiveTab] = useState(incomingConfig ? incomingConfig.tab : 'lips');
+  const [eyeshadowColor, setEyeshadowColor] = useState('transparent');
+  const [blushColor, setBlushColor] = useState('transparent');
   const [skinGlow, setSkinGlow] = useState(0.2);
 
+  const [selectedEyeshadowColor, setSelectedEyeshadowColor] = useState(incomingConfig && incomingConfig.tab === 'eyes' ? incomingConfig.hex : '#673147'); // Default selection
+  const [selectedBlushColor, setSelectedBlushColor] = useState(incomingConfig && incomingConfig.tab === 'face' ? incomingConfig.hex : '#ff8a80');
+  const [selectedLipstickColor, setSelectedLipstickColor] = useState(incomingConfig && incomingConfig.tab === 'lips' ? incomingConfig.hex : '#4B0082');
+
   // Isolated opacity settings
-  const [lipsOpacity, setLipsOpacity] = useState(0.5);
+  const [lipsOpacity, setLipsOpacity] = useState(0); // Only AI image should be visible
   const [eyesOpacity, setEyesOpacity] = useState(0.3);
   const [blushOpacity, setBlushOpacity] = useState(0.4);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [lipstickColor, setLipstickColor] = useState('#4B0082'); // Rich Deep Purple Default
+  const [lipstickColor, setLipstickColor] = useState('transparent');
+  const [loadingStage, setLoadingStage] = useState("");
   const [isCalibrating, setIsCalibrating] = useState(false);
-  const [isAiDetectionActive, setIsAiDetectionActive] = useState(true);
   const [naturalDims, setNaturalDims] = useState({ w: 100, h: 100 });
   const [markupOffset, setMarkupOffset] = useState({ x: 0, y: 0 });
   const [domBounds, setDomBounds] = useState({ width: 100, height: 100, x: 0, y: 0 });
@@ -106,40 +112,153 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
   const [cheekPins, setCheekPins] = useState([]);
   const [pins, setPins] = useState([]); // For manual editing
 
-  const handleWebhook = async () => {
+  const autoTryOnFired = useRef(false);
+
+  useEffect(() => {
+    if (incomingConfig && incomingConfig.autoTryOn && modelsLoaded && pins && pins.length > 0 && !autoTryOnFired.current) {
+      autoTryOnFired.current = true;
+      handleAutoTryon(sourceImage);
+    }
+  }, [modelsLoaded, pins, incomingConfig, sourceImage]);
+
+  const applyMakeupToCanvas = async (sourceUrl, config, landmarks) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = sourceUrl;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        // 1. Draw original image
+        ctx.drawImage(img, 0, 0);
+        
+        // 2. Draw Makeup Overlays
+        if (landmarks && landmarks.length >= 68) {
+          // LIPS
+          if (config.lipstick && config.lipstick !== 'transparent') {
+            ctx.beginPath();
+            ctx.fillStyle = config.lipstick;
+            ctx.globalAlpha = 0.6;
+            ctx.filter = `blur(${img.width * 0.005}px)`;
+            const lipPoints = landmarks.slice(48, 60); 
+            ctx.moveTo((lipPoints[0].x / 100) * img.width, (lipPoints[0].y / 100) * img.height);
+            lipPoints.forEach(p => ctx.lineTo((p.x / 100) * img.width, (p.y / 100) * img.height));
+            ctx.closePath();
+            ctx.fill();
+          }
+          
+          // EYES
+          if (config.eyes && config.eyes !== 'transparent') {
+            ctx.fillStyle = config.eyes;
+            ctx.globalAlpha = 0.35;
+            ctx.filter = `blur(${img.width * 0.015}px)`;
+            const le = landmarks[37]; // Top of left eye
+            ctx.beginPath();
+            ctx.arc((le.x / 100) * img.width, ((le.y - 2) / 100) * img.height, img.width * 0.04, 0, 2 * Math.PI);
+            ctx.fill();
+            const re = landmarks[44]; // Top of right eye
+            ctx.beginPath();
+            ctx.arc((re.x / 100) * img.width, ((re.y - 2) / 100) * img.height, img.width * 0.04, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+
+          // FACE (Foundation)
+          if (config.face && config.face !== 'transparent') {
+            ctx.fillStyle = config.face;
+            ctx.globalAlpha = 0.25;
+            ctx.filter = `blur(${img.width * 0.03}px)`;
+            ctx.beginPath();
+            ctx.moveTo((landmarks[0].x / 100) * img.width, (landmarks[0].y / 100) * img.height);
+            for(let i=1; i<=16; i++) {
+                ctx.lineTo((landmarks[i].x / 100) * img.width, (landmarks[i].y / 100) * img.height);
+            }
+            for(let i=26; i>=17; i--) {
+                ctx.lineTo((landmarks[i].x / 100) * img.width, ((landmarks[i].y - 6) / 100) * img.height);
+            }
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
+      };
+    });
+  };
+
+  const handleAutoTryon = async (targetImg) => {
+    const finalSource = targetImg || sourceImage;
+    if (!finalSource) return;
     try {
+      setImage(finalSource);
       setIsLoading(true);
+      setLoadingStage("PREPARING IMAGE...");
+
+      const makeupConfig = {
+        lipstick: selectedLipstickColor,
+        eyes: selectedEyeshadowColor,
+        face: selectedBlushColor // used for face foundation tab
+      };
+
+      // Pre-apply color using landmarks for AI to refine
+      const coloredImage = await applyMakeupToCanvas(finalSource, makeupConfig, pins);
+      
       const formData = new FormData();
-      
-      // Get the current face data (either the static image or a fresh camera capture)
-      const currentSource = mode === 'camera' ? webcamRef.current?.getScreenshot() : image;
-      
-      // Convert to Blob for the webhook
-      if (currentSource && currentSource.startsWith('data:')) {
-        const res = await fetch(currentSource);
-        const blob = await res.blob();
-        formData.append('image', blob, 'user_capture.jpg');
-      } else {
-        formData.append('image_url', currentSource);
+      let blob;
+      try {
+        const res = await fetch(coloredImage);
+        blob = await res.blob();
+      } catch (e) {
+        console.error(e);
+        setIsLoading(false);
+        return;
       }
-      
-      formData.append('lipstick_color', lipstickColor);
-      formData.append('lipstick_opacity', lipsOpacity);
-      formData.append('eyeshadow_color', eyeshadowColor);
-      formData.append('blush_color', blushColor);
-      formData.append('mode', mode);
-      await fetch("https://jinalpatel.app.n8n.cloud/webhook/lipstick-tryon", {
+
+      formData.append('image', blob, 'user_capture.jpg');
+      formData.append('shade', makeupConfig.lipstick.startsWith('#') ? makeupConfig.lipstick.slice(1) : makeupConfig.lipstick);
+
+      setLoadingStage("AI PROCESSING...");
+      const res = await fetch("/api/lipstick", {
         method: "POST",
         body: formData
       });
-      
-      alert("Sent to AI Workflow! Check your n8n dashboard.");
+
+      if (res.ok) {
+        setLoadingStage("GENERATING PREVIEW...");
+        const text = await res.text();
+        if (!text) return;
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("Response was not JSON:", text);
+          return;
+        }
+
+        const outputUrl = (Array.isArray(data) ? data[0]?.transformed_url : data.transformed_url) || data.url || data.image || data.data0;
+
+        if (outputUrl) {
+          console.log("AI Image Received:", outputUrl);
+          setImage(outputUrl);
+          setLipsOpacity(0);
+          setLoadingStage("READY!");
+          setTimeout(() => setLoadingStage(""), 2000);
+        }
+      }
     } catch (err) {
-      console.error("Webhook push failed:", err);
-      alert("Failed to send to workflow.");
+      console.error("AI Tryon failed:", err);
+      setLoadingStage("ERROR. TRY AGAIN.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleWebhook = async () => {
+    // Keep EXPORT logic if needed, or call handleAutoTryon
+    handleAutoTryon(selectedLipstickColor, mode === 'camera' ? webcamRef.current?.getScreenshot() : image);
   };
 
   useEffect(() => {
@@ -267,14 +386,12 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
   }, [pins, naturalDims]);
 
   useEffect(() => {
-    if (isAiDetectionActive) {
-      if (mode === 'camera') {
-        const interval = setInterval(runDetection, 100); return () => clearInterval(interval);
-      } else {
-        runDetection(); // Single high-precision run for photos
-      }
+    if (mode === 'camera') {
+      const interval = setInterval(runDetection, 100); return () => clearInterval(interval);
+    } else {
+      runDetection(); // Single high-precision run for photos
     }
-  }, [isAiDetectionActive, mode, image, runDetection]);
+  }, [mode, image, runDetection]);
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', background: '#0a0a0a' }}>
@@ -285,15 +402,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
           <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white' }}>AI Pro Studio</h2>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => setIsCalibrating(!isCalibrating)} style={{ background: isCalibrating ? PRIMARY_COLOR : 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}>
-            {isCalibrating ? 'CLOSE CALIBRATION' : 'CALIBRATE AI'}
-          </button>
-          <button 
-            onClick={handleWebhook}
-            style={{ background: PRIMARY_COLOR, border: 'none', color: 'white', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <Download size={14} /> EXPORT
-          </button>
+          {/* Export button removed */}
         </div>
       </div>
 
@@ -301,7 +410,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
       <div className="studio-ui-wrapper">
 
         {/* Main Workspace (Image/Webcam) */}
-        <div className="studio-workspace" style={{ position: 'relative', display: 'flex', flex: 1, overflow: 'hidden', background: '#000', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="studio-workspace" style={{ position: 'relative', display: 'flex', flex: 0.85, overflow: 'hidden', background: '#000', alignItems: 'center', justifyContent: 'center' }}>
 
           {/* 
                 CONTENT-BOX: This is the 'Secret Sauce'. 
@@ -332,19 +441,29 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
               />
             )}
 
+            {mode === 'photo' && (
+              <img
+                src={image}
+                className="main-model-image"
+                alt="Model"
+                onLoad={(e) => setNaturalDims({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain', zIndex: 0 }}
+              />
+            )}
+
             {/* UNIFIED SVG RENDER BOX: Native mix-blend-mode */}
             <svg
               viewBox={`0 0 ${naturalDims.w || 100} ${naturalDims.h || 100}`}
               style={{
+                position: 'relative',
+                zIndex: 1,
                 width: '100%',
                 height: '100%',
                 display: 'block',
                 transform: mode === 'camera' ? 'scaleX(-1)' : 'none'
               }}
             >
-              {mode === 'photo' && (
-                <image href={image} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" />
-              )}
+              {/* <image href={image} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" /> */}
 
               {/* Eyeshadow */}
               <path d={eyeLPath} fill={eyeshadowColor} style={{ opacity: eyesOpacity, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.012}px)` }} />
@@ -372,37 +491,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
                   transition={{ duration: 0.6 }}
                   filter="url(#naturalSoftEdge)"
                 >
-                  {/* Layer 1: Base Pigment (Normal) - Solid visibility */}
-                  <path d={lipTopPath} fill={lipstickColor} style={{ opacity: 0.3 }} />
-                  <path d={lipBotPath} fill={lipstickColor} style={{ opacity: 0.3 }} />
-
-                  {/* Layer 2: Texture Integration (Soft-Light) */}
-                  <motion.path
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1 }}
-                    d={lipTopPath} fill={lipstickColor} style={{ mixBlendMode: 'soft-light' }}
-                  />
-                  <motion.path
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1 }}
-                    d={lipBotPath} fill={lipstickColor} style={{ mixBlendMode: 'soft-light' }}
-                  />
-
-                  {/* Layer 3: Depth & Gloss (Multiply & Screen) */}
-                  <motion.path
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                    d={lipTopPath} fill={lipstickColor} style={{ mixBlendMode: 'multiply' }}
-                  />
-                  <motion.path
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.25 }}
-                    transition={{ duration: 1, delay: 0.6 }}
-                    d={lipTopPath} fill="url(#lipGloss)" style={{ mixBlendMode: 'screen' }}
-                  />
+                  {/* Local preview layers disabled as per request to see only AI output */}
                 </motion.g>
               </AnimatePresence>
 
@@ -429,121 +518,110 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
           {/* Loader Overlay */}
           <AnimatePresence>
             {isLoading && (
-              <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.8)', display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ color: PRIMARY_COLOR }}><RefreshCcw size={48} /></motion.div>
+              <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ color: PRIMARY_COLOR, marginBottom: '20px' }}><RefreshCcw size={48} /></motion.div>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ color: 'white', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.2em' }}
+                >
+                  {loadingStage}
+                </motion.p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Right Controls Panel */}
-        <div className="studio-ui-sidebar hide-scrollbar">
+        <div className="studio-ui-sidebar hide-scrollbar" style={{ padding: '15px' }}>
 
           {/* Nav Icons */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '10px' }}>
             {[
               { id: 'lips', icon: Heart, label: 'Lips' },
               { id: 'eyes', icon: Eye, label: 'Eyes' },
               { id: 'face', icon: Smile, label: 'Face' }
             ].map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', padding: '8px 0', borderRadius: '12px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === tab.id ? PRIMARY_COLOR : 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }}>
-                <tab.icon size={18} /><span style={{ fontSize: '0.6rem', fontWeight: 700, marginTop: '4px' }}>{tab.label}</span>
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.1)' : 'transparent', border: 'none', padding: '6px 0', borderRadius: '12px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', color: activeTab === tab.id ? PRIMARY_COLOR : 'rgba(255,255,255,0.4)', transition: 'all 0.3s' }}>
+                <tab.icon size={16} /><span style={{ fontSize: '0.6rem', fontWeight: 700, marginTop: '2px' }}>{tab.label}</span>
               </button>
             ))}
           </div>
 
-          <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', marginBottom: '10px' }}>CALIBRATION</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '20px' }}>
-            {[
-              'https://images.unsplash.com/photo-1549233634-9388147d9673?auto=format&fit=crop&q=80&w=150&h=150',
-              'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=150&h=150',
-              'https://images.unsplash.com/photo-1498842812179-c81beecf902c?auto=format&fit=crop&q=80&w=150&h=150',
-              'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=150&h=150'
-            ].map((url, i) => (
-              <button key={`model-${i}`} onClick={() => setImage(url)} style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: image === url ? `2px solid ${PRIMARY_COLOR}` : '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 0 }}>
-                <img src={url} alt="Model" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </button>
-            ))}
-            <label style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <Plus size={16} color="white" />
-              <input type="file" hidden accept="image/*" onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (ev) => setImage(ev.target.result);
-                  reader.readAsDataURL(file);
-                }
-              }} />
-            </label>
-          </div>
-
-          <AnimatePresence>
-            {isCalibrating && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden', marginBottom: '20px' }}>
-                <div className="glass-card" style={{ padding: '15px 12px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <p style={{ fontSize: '10px', fontWeight: 900, color: 'rgba(255,255,255,0.4)', marginBottom: '10px', letterSpacing: '0.1em' }}>PRECISION CALIBRATION ACTIVE</p>
-                  <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)', marginBottom: '12px' }}>Drag the pins on the face to refine the lip edges perfectly.</p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', marginBottom: '10px' }}>PALETTE</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px', marginBottom: '24px', maxHeight: '300px', overflowY: 'auto', padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px' }} className="hide-scrollbar">
+          <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', marginBottom: '8px' }}>PALETTE</p>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(30px, 1fr))', 
+            gap: '6px', 
+            marginBottom: '10px', 
+            maxHeight: '180px', 
+            overflowY: 'auto', 
+            padding: '8px', 
+            background: 'rgba(255,255,255,0.02)', 
+            borderRadius: '16px' 
+          }} className="hide-scrollbar">
             {(activeTab === 'lips' ?
               [
+                'transparent',
                 // REDS
-                '#4A0404', '#5C0000', '#7A0000', '#850000', '#990000', '#B22222', '#C41E3A', '#D4145A', '#E60000', '#FF0000', '#FF2400', '#B21807', '#930D0D', '#800020', '#660000', '#540E1B', '#3E0D10', '#6E2626', '#8F3939', '#5D2525',
+                '#850000', '#B22222', '#C41E3A', '#FF0000', '#800020', '#3E0D10',
                 // PINKS
-                '#FFB6C1', '#FFC0CB', '#FB607F', '#FF69B4', '#FF1493', '#C71585', '#E0115F', '#D02090', '#DA70D6', '#BA55D3', '#9370DB', '#8A2BE2', '#9400D3', '#9932CC', '#8B008B', '#800080', '#D8BFD8', '#DDA0DD', '#EE82EE', '#FF00FF',
+                '#FB607F', '#FF69B4', '#FF1493', '#C71585', '#DA70D6', '#FF00FF',
                 // NUDES/BROWNS
-                '#E3BC9A', '#D2B48C', '#BC8F8F', '#F4A460', '#DAA520', '#CD853F', '#D2691E', '#B87333', '#8B4513', '#A0522D', '#D2691E', '#CD5C5C', '#E9967A', '#F08080', '#AF6E4D', '#855E42', '#6B4226', '#483C32', '#3B2F2F', '#2A1A1A',
+                '#E3BC9A', '#BC8F8F', '#CD853F', '#8B4513', '#A0522D', '#2A1A1A',
                 // PLUMS/DARKERS
-                '#4B0082', '#3D0158', '#483D8B', '#2E0854', '#5E2D79', '#673147', '#722F37', '#58111A', '#3F000F', '#301934', '#1A1110', '#2B1B17', '#120A08', '#0D0806', '#120404', '#000000', '#1A1A1A', '#2F4F4F', '#000080', '#191970',
-                // CORALS/PEACH
-                '#FF4500', '#FF6347', '#FF7F50', '#FF8C00', '#FFA500', '#FFD700', '#FFB347', '#FF9966', '#FF8964', '#FF7F50', '#E9967A', '#F4A460', '#FA8072', '#E08080', '#D2691E', '#B22222', '#CD5C5C', '#F08080', '#FF7F50', '#FF4F00'
+                '#4B0082', '#3D0158', '#5E2D79', '#673147', '#301934', '#000000'
               ] :
               activeTab === 'eyes' ?
-                ['#4a148c', '#311b92', '#1a237e', '#01579b', '#004d40', '#1b5e20', '#33691e', '#827717', '#f57f17', '#ff6f00', '#000000', '#2c3e50', '#34495e', '#7f8c8d'] :
-                ['#ff8a80', '#ff80ab', '#ea80fc', '#b388ff', '#8c9eff', '#82b1ff', '#80d8ff', '#84ffff', '#a7ffeb', '#b9f6ca', '#e57373', '#f06292', '#ba68c8']
-            ).map(color => (
-              <button
-                key={color}
-                onClick={() => { if (activeTab === 'lips') setLipstickColor(color); else if (activeTab === 'eyes') setEyeshadowColor(color); else setBlushColor(color); }}
-                style={{
-                  width: '100%',
-                  aspectRatio: '1/1',
-                  borderRadius: '50%',
-                  background: color,
-                  border: (activeTab === 'lips' ? lipstickColor : activeTab === 'eyes' ? eyeshadowColor : blushColor) === color ? '2px solid white' : 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  transform: (activeTab === 'lips' ? lipstickColor : activeTab === 'eyes' ? eyeshadowColor : blushColor) === color ? 'scale(1.2)' : 'scale(1)',
-                  boxShadow: (activeTab === 'lips' ? lipstickColor : activeTab === 'eyes' ? eyeshadowColor : blushColor) === color ? `0 4px 12px ${color}60` : 'none'
-                }}
-              />
-            ))}
+                ['transparent', '#4a148c', '#311b92', '#1a237e', '#01579b', '#004d40', '#1b5e20', '#33691e', '#827717', '#f57f17', '#ff6f00', '#000000', '#2c3e50', '#34495e', '#7f8c8d'] :
+                ['transparent', '#FFE0C4', '#FCD6B9', '#F5CBAC', '#E4B594', '#D5A17A', '#C68E63', '#B4784C', '#986036', '#734122', '#4A2511']
+            ).map((color, index) => {
+              const isSelected = (activeTab === 'lips' ? selectedLipstickColor : activeTab === 'eyes' ? selectedEyeshadowColor : selectedBlushColor) === color;
+              return (
+                <button
+                  key={`lipstick-shade-${index}`}
+                  onClick={() => {
+                    if (activeTab === 'lips') {
+                      setSelectedLipstickColor(color);
+                      setLipstickColor(color);
+                    } else if (activeTab === 'eyes') setSelectedEyeshadowColor(color);
+                    else setSelectedBlushColor(color);
+                  }}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1/1',
+                    borderRadius: '50%',
+                    background: color === 'transparent' ? 'rgba(255,255,255,0.05)' : color,
+                    border: isSelected ? '3px solid white' : '1px solid rgba(255,255,255,0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                    boxShadow: isSelected ? `0 0 15px ${color === 'transparent' ? '#fff' : color}80, 0 4px 10px rgba(0,0,0,0.5)` : 'none',
+                    position: 'relative',
+                    zIndex: isSelected ? 2 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {color === 'transparent' && <X size={14} color="rgba(255,255,255,0.4)" />}
+                </button>
+              );
+            })}
           </div>
 
           <div style={{ marginTop: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>INTENSITY</span>
-              <span style={{ fontSize: '0.65rem', color: PRIMARY_COLOR, fontWeight: 900 }}>
-                {Math.round((activeTab === 'lips' ? lipsOpacity : activeTab === 'eyes' ? eyesOpacity : blushOpacity) * 100)}%
-              </span>
-            </div>
-            <input
-              type="range" min="0" max="1" step="0.01"
-              value={activeTab === 'lips' ? lipsOpacity : activeTab === 'eyes' ? eyesOpacity : blushOpacity}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (activeTab === 'lips') setLipsOpacity(val);
-                else if (activeTab === 'eyes') setEyesOpacity(val);
-                else setBlushOpacity(val);
+            <button
+              onClick={() => {
+                setLipstickColor(selectedLipstickColor);
+                setEyeshadowColor(selectedEyeshadowColor);
+                setBlushColor(selectedBlushColor);
+                handleAutoTryon(sourceImage);
               }}
-              style={{ width: '100%', accentColor: PRIMARY_COLOR, cursor: 'pointer' }}
-            />
-            <button onClick={() => setIsAiDetectionActive(!isAiDetectionActive)} style={{ width: '100%', height: '40px', marginTop: '16px', borderRadius: '12px', background: isAiDetectionActive ? PRIMARY_COLOR : 'rgba(255,255,255,0.05)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer' }}>{isAiDetectionActive ? "AI On" : "AI Off"}</button>
+              style={{ width: '100%', height: '36px', marginTop: '10px', borderRadius: '12px', background: PRIMARY_COLOR, color: 'white', border: 'none', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.3s' }}
+            >
+              TRY ON
+            </button>
           </div>
         </div>
       </div>
@@ -553,6 +631,9 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo' }) => {
 
 export default function Studio() {
   const [session, setSession] = useState({ image: null, mode: 'photo' });
+  const location = useLocation();
+  const incomingConfig = location.state;
+
   const onDrop = useCallback(acceptedFiles => {
     const file = acceptedFiles[0];
     const reader = new FileReader();
@@ -562,7 +643,7 @@ export default function Studio() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] }, multiple: false });
 
   if (session.image) {
-    return <StudioUI initialImage={session.image} initialMode={session.mode} onReset={() => setSession({ image: null, mode: 'photo' })} />;
+    return <StudioUI initialImage={session.image} initialMode={session.mode} onReset={() => setSession({ image: null, mode: 'photo' })} incomingConfig={incomingConfig} />;
   }
 
   return (

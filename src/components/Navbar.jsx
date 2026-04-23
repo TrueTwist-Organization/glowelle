@@ -109,14 +109,37 @@ const Navbar = () => {
             <Link 
               key={link.name}
               to={link.path} 
-              style={{ 
+              style={link.name === 'Try-On' ? {
+                background: 'linear-gradient(45deg, #FF0080, #7928CA, #FF0080)',
+                backgroundSize: '200% auto',
+                animation: 'gradientMove 3s linear infinite',
+                color: 'white',
+                padding: '6px 16px',
+                borderRadius: '100px',
+                textDecoration: 'none',
+                boxShadow: '0 0 20px rgba(255, 0, 128, 0.5), 0 0 40px rgba(121, 40, 202, 0.3)',
+                fontWeight: '950',
+                fontSize: '0.8rem',
+                letterSpacing: '0.12em',
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textTransform: 'uppercase'
+              } : { 
                 color: '#F5C6C6', 
                 textDecoration: 'none', 
                 transition: 'all 0.3s ease',
                 textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8)'
               }}
-              onMouseOver={(e) => e.target.style.color = '#fff'}
-              onMouseOut={(e) => e.target.style.color = '#F5C6C6'}
+              onMouseOver={(e) => {
+                if (link.name !== 'Try-On') e.target.style.color = '#fff';
+                else e.target.style.filter = 'brightness(1.1)';
+              }}
+              onMouseOut={(e) => {
+                if (link.name !== 'Try-On') e.target.style.color = '#F5C6C6';
+                else e.target.style.filter = 'brightness(1)';
+              }}
             >
               {link.name}
             </Link>
@@ -188,7 +211,14 @@ const Navbar = () => {
                   <Link 
                     to={link.path} 
                     onClick={() => setIsOpen(false)}
-                    style={{ 
+                    style={link.name === 'Live Try-On' ? { 
+                      fontSize: '2.5rem', 
+                      fontWeight: 950, 
+                      color: '#FF758F', 
+                      textDecoration: 'none',
+                      letterSpacing: '-0.04em',
+                      textShadow: '0 0 20px rgba(255, 117, 143, 0.4)'
+                    } : { 
                       fontSize: '2.5rem', 
                       fontWeight: 900, 
                       color: link.color, 

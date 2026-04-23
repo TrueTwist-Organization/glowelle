@@ -68,15 +68,15 @@ const Checkout = () => {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'transparent' }}>
-      <div className="container" style={{ paddingTop: '8rem', paddingBottom: '10rem' }}>
+      <div className="container" style={{ paddingTop: 'clamp(5rem, 15vh, 8rem)', paddingBottom: 'clamp(4rem, 10vh, 10rem)' }}>
         
         {/* Progress Bar */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          gap: '2rem', 
-          marginBottom: '5rem' 
+          gap: 'clamp(1rem, 5vw, 2rem)', 
+          marginBottom: 'clamp(2.5rem, 8vh, 5rem)' 
         }}>
           {steps.map((s, idx) => (
             <React.Fragment key={s.id}>
@@ -104,7 +104,7 @@ const Checkout = () => {
                 <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{s.name}</span>
               </div>
               {idx < steps.length - 1 && (
-                <div style={{ width: '60px', height: '2px', background: 'rgba(255,255,255,0.1)', marginTop: '-1.5rem' }}>
+                <div style={{ width: 'clamp(30px, 10vw, 60px)', height: '2px', background: 'rgba(255,255,255,0.1)', marginTop: '-1.5rem' }}>
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: step > s.id ? '100%' : '0%' }}
@@ -126,7 +126,7 @@ const Checkout = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '5rem', alignItems: 'start' }}
+                className="checkout-layout"
               >
                 <div>
                   <h2 style={{ fontSize: '3rem', marginBottom: '2.5rem', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Shipping <span className="text-lips">Address</span></h2>
@@ -161,7 +161,7 @@ const Checkout = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '5rem', alignItems: 'start' }}
+                className="checkout-layout"
               >
                 <div>
                   <h2 style={{ fontSize: '3.0rem', marginBottom: '2.5rem', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>Choose <span className="text-lips">Payment</span></h2>
@@ -248,7 +248,7 @@ const Checkout = () => {
 };
 
 const OrderSummary = ({ subtotal, cartItems }) => (
-  <div style={{ padding: '0 1rem', position: 'sticky', top: '10rem' }}>
+  <div className="checkout-summary">
     <h3 style={{ fontSize: '1.8rem', marginBottom: '2.5rem', color: 'white', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Order Details</h3>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '2rem' }}>
       {cartItems.map(item => (

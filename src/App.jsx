@@ -16,7 +16,9 @@ import Wishlist from './pages/Wishlist';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import AIAssistant from './pages/AIAssistant';
+import TestTryOn from './pages/TestTryOn';
 import Footer from './components/Footer';
+import Support from './pages/Support';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -52,6 +54,8 @@ const AppContent = () => {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route path="/test-tryon" element={<TestTryOn />} />
+            <Route path="/support/:type" element={<Support />} />
           </Routes>
         </AnimatePresence>
       </main>

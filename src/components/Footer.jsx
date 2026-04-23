@@ -13,16 +13,11 @@ const Footer = () => {
       { name: 'Eye Makeup', path: '/category/eye-makeup' },
       { name: 'Skincare', path: '/category/skincare' }
     ],
-    experience: [
-      { name: 'Virtual Try-On', path: '/test-model' },
-      { name: 'AI Beauty Assistant', path: '/ai-assistant' },
-      { name: 'Interactive Studio', path: '/test-model' }
-    ],
     support: [
-      { name: 'Shipping Policy', path: '#' },
-      { name: 'Returns & Exchanges', path: '#' },
-      { name: 'Privacy Policy', path: '#' },
-      { name: 'Contact Us', path: '#' }
+      { name: 'Shipping Policy', path: '/support/shipping' },
+      { name: 'Returns & Exchanges', path: '/support/returns' },
+      { name: 'Privacy Policy', path: '/support/privacy' },
+      { name: 'Contact Us', path: '/support/contact' }
     ]
   };
 
