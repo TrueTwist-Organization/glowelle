@@ -271,9 +271,10 @@ const Home = () => {
               aspectRatio: '1/1',
               boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
               border: '4px solid rgba(255,255,255,0.05)',
-              cursor: 'ew-resize'
+              cursor: 'ew-resize',
+              background: '#111'
             }}>
-              {/* After Image (Full width, absolute) */}
+              {/* After Image (Base Layer) */}
               <img 
                 src="/assets/after.png" 
                 alt="After" 
@@ -281,13 +282,14 @@ const Home = () => {
                   position: 'absolute',
                   top: 0,
                   left: 0,
-                  width: '550px', 
+                  width: '550px', // Fixed pixel width for perfect alignment
                   height: '550px', 
-                  objectFit: 'cover' 
+                  objectFit: 'cover',
+                  display: 'block'
                 }}
               />
               
-              {/* Before Image (Clipped overlay) */}
+              {/* Before Image (Clipped Overlay Layer) */}
               <div style={{ 
                 position: 'absolute', 
                 top: 0, 
@@ -306,7 +308,7 @@ const Home = () => {
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    width: '550px', 
+                    width: '550px', // Matches the After image exactly
                     height: '550px', 
                     objectFit: 'cover',
                     maxWidth: 'none'
