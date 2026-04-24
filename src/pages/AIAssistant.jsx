@@ -253,6 +253,8 @@ const AIAssistant = () => {
                 <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Upload Photo</h3>
                 <p style={{ fontSize: '1rem', opacity: 0.6, marginTop: '0.8rem' }}>Choose from gallery</p>
                 <input 
+                  id="ai-assistant-upload"
+                  name="ai-assistant-upload"
                   type="file" 
                   ref={fileInputRef} 
                   style={{ display: 'none' }} 

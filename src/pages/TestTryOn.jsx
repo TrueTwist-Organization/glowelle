@@ -60,6 +60,8 @@ export default function TestPage() {
         marginBottom: '2rem'
       }}>
         <input 
+          id="test-upload-input"
+          name="test-upload-input"
           type="file" 
           accept="image/*" 
           onChange={handleFile}

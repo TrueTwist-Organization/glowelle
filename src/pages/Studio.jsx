@@ -174,47 +174,62 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
   };
 
   const handleAutoTryon = async (targetImg) => {
-    const finalSource = targetImg || sourceImage;
-    if (!finalSource) return;
+    let finalSource = targetImg || sourceImage;
+    
+    // Handle camera mode: if finalSource is 'camera_active', take a fresh screenshot
+    if (finalSource === 'camera_active' && webcamRef.current) {
+      finalSource = webcamRef.current.getScreenshot();
+    }
+
+    if (!finalSource || finalSource === 'camera_active') {
+      console.warn("AI Try-On: No valid source image available.");
+      return;
+    }
+
     try {
       setIsLoading(true);
+      const shadeHex = selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor;
+      console.log("AI Tryon: Starting process for shade", shadeHex);
       setLoadingStage("AI GENERATING...");
 
       const formData = new FormData();
-      // Convert base64 to blob if needed
+      
+      // Get the image blob
       let blob;
       if (finalSource.startsWith('data:')) {
         const res = await fetch(finalSource);
         blob = await res.blob();
       } else {
-        // If it's a URL, fetch it first
         const res = await fetch(finalSource);
         blob = await res.blob();
       }
 
-      formData.append('file', blob, 'image.jpg');
-      formData.append('shade', selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor);
+      console.log("AI Tryon: Image blob created, size:", blob.size);
+      formData.append('image', blob, 'image.jpg');
+      formData.append('shade', shadeHex);
 
+      console.log("AI Tryon: Sending POST request to /api/lipstick...");
       const res = await fetch("/api/lipstick", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          image: finalSource, // Sending base64 directly
-          shade: selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor
-        })
+        body: formData
       });
 
       if (res.ok) {
         const data = await res.json();
-        const outputUrl = data.transformed_url || data.url || data.image;
+        // Support multiple possible response formats from n8n
+        const outputUrl = (Array.isArray(data) ? data[0]?.transformed_url : data.transformed_url) || data.url || data.image || data.output;
+        
         if (outputUrl) {
           setImage(outputUrl);
           setLoadingStage("SUCCESS!");
           setTimeout(() => setLoadingStage(""), 2000);
+        } else {
+          console.error("AI Response missing image URL:", data);
+          setLoadingStage("AI ERROR: NO IMAGE");
         }
       } else {
+        const errorText = await res.text();
+        console.error("Server Error:", errorText);
         setLoadingStage("SERVER ERROR");
       }
     } catch (err) {
@@ -223,11 +238,6 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleWebhook = async () => {
-    // Keep EXPORT logic if needed, or call handleAutoTryon
-    handleAutoTryon(selectedLipstickColor, mode === 'camera' ? webcamRef.current?.getScreenshot() : image);
   };
 
   useEffect(() => {
@@ -249,10 +259,14 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
 
   useEffect(() => {
     if (initialImage) {
+      console.log("StudioUI: Initializing with image", initialImage.substring(0, 50) + "...");
       setImage(initialImage);
-      setPins([]); // Clear previous anchors to force fresh detection or fallback
+      setSourceImage(initialImage); // Crucial: Update sourceImage for AI try-on
+      setPins([]); 
       setMarkupOffset({ x: 0, y: 0 });
       setIsLoading(true);
+      setLoadingStage("READY");
+      setTimeout(() => setIsLoading(false), 1000);
     }
   }, [initialImage]);
 
@@ -451,12 +465,15 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                 </filter>
               </defs>
 
-              {/* ULTRA-REALISTIC GRADUAL APPLICATION ANIMATION */}
+              {/* 
+                  AI-ONLY MODE: Immediate SVG overlays disabled to focus on AI generated output 
+                  The lipstickColor and lipsOpacity are now only used if we want manual overlays.
+              */}
               <AnimatePresence mode="wait">
                 <motion.g
                   key={lipstickColor}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: lipsOpacity }}
+                  animate={{ opacity: 0 }} // Forced to 0 to hide SVG overlay
                   transition={{ duration: 0.6 }}
                   filter="url(#naturalSoftEdge)"
                   style={{ mixBlendMode: 'multiply' }}
@@ -554,14 +571,13 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                   onClick={() => {
                     if (activeTab === 'lips') {
                       setSelectedLipstickColor(color);
-                      setLipstickColor(color);
-                      setLipsOpacity(color === 'transparent' ? 0 : 0.8);
+                      // Removed immediate apply
                     } else if (activeTab === 'eyes') {
                       setSelectedEyeshadowColor(color);
-                      setEyesOpacity(color === 'transparent' ? 0 : 0.4);
+                      // Removed immediate apply
                     } else {
                       setSelectedBlushColor(color);
-                      setBlushOpacity(color === 'transparent' ? 0 : 0.4);
+                      // Removed immediate apply
                     }
                   }}
                   style={{
@@ -634,7 +650,7 @@ export default function Studio() {
       </div>
 
       <div {...getRootProps()} className="glass-card" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px', border: isDragActive ? `4px dashed ${PRIMARY_COLOR}` : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '40px' }}>
-        <input {...getInputProps()} />
+        <input {...getInputProps()} id="studio-upload-input" name="studio-upload-input" />
         <Upload size={40} style={{ color: PRIMARY_COLOR, marginBottom: '24px' }} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Upload Photo for AI Try-On</h2>
         <p style={{ opacity: 0.6, marginTop: '10px' }}>or drag and drop here</p>
