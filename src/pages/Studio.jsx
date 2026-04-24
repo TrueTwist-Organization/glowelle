@@ -177,65 +177,43 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
     const finalSource = targetImg || sourceImage;
     if (!finalSource) return;
     try {
-      setImage(finalSource);
       setIsLoading(true);
-      setLoadingStage("PREPARING IMAGE...");
+      setLoadingStage("AI GENERATING...");
 
-      const makeupConfig = {
-        lipstick: selectedLipstickColor,
-        eyes: selectedEyeshadowColor,
-        face: selectedBlushColor // used for face foundation tab
-      };
-
-      // Pre-apply color using landmarks for AI to refine
-      const coloredImage = await applyMakeupToCanvas(finalSource, makeupConfig, pins);
-      
       const formData = new FormData();
+      // Convert base64 to blob if needed
       let blob;
-      try {
-        const res = await fetch(coloredImage);
+      if (finalSource.startsWith('data:')) {
+        const res = await fetch(finalSource);
         blob = await res.blob();
-      } catch (e) {
-        console.error(e);
-        setIsLoading(false);
-        return;
+      } else {
+        // If it's a URL, fetch it first
+        const res = await fetch(finalSource);
+        blob = await res.blob();
       }
 
-      formData.append('image', blob, 'user_capture.jpg');
-      formData.append('shade', makeupConfig.lipstick.startsWith('#') ? makeupConfig.lipstick.slice(1) : makeupConfig.lipstick);
+      formData.append('file', blob, 'image.jpg');
+      formData.append('shade', selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor);
 
-      setLoadingStage("AI PROCESSING...");
       const res = await fetch("/api/lipstick", {
         method: "POST",
         body: formData
       });
 
       if (res.ok) {
-        setLoadingStage("GENERATING PREVIEW...");
-        const text = await res.text();
-        if (!text) return;
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error("Response was not JSON:", text);
-          return;
-        }
-
-        const outputUrl = (Array.isArray(data) ? data[0]?.transformed_url : data.transformed_url) || data.url || data.image || data.data0;
-
+        const data = await res.json();
+        const outputUrl = data.transformed_url || data.url || data.image;
         if (outputUrl) {
-          console.log("AI Image Received:", outputUrl);
           setImage(outputUrl);
-          setLipsOpacity(0);
-          setLoadingStage("READY!");
+          setLoadingStage("SUCCESS!");
           setTimeout(() => setLoadingStage(""), 2000);
         }
+      } else {
+        setLoadingStage("SERVER ERROR");
       }
     } catch (err) {
       console.error("AI Tryon failed:", err);
-      setLoadingStage("ERROR. TRY AGAIN.");
+      setLoadingStage("CONNECTION FAILED");
     } finally {
       setIsLoading(false);
     }
