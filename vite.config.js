@@ -12,10 +12,7 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/api\/lipstick/, '/lipstick'),
         timeout: 600000, 
-        proxyTimeout: 600000,
-        headers: {
-          'Connection': 'keep-alive'
-        }
+        proxyTimeout: 600000
       }
     }
   }
