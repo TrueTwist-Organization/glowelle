@@ -9,13 +9,12 @@ export default defineConfig({
       '/api/lipstick': {
         target: 'http://127.0.0.1:5678',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api\/lipstick/, '/webhook/lipstick-try-on'),
-        timeout: 300000, // 5 minutes for AI processing
-        proxyTimeout: 300000,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
-            console.log('proxy error', err);
-          });
+        timeout: 600000, 
+        proxyTimeout: 600000,
+        headers: {
+          'Connection': 'keep-alive'
         }
       }
     }
