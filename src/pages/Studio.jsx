@@ -86,14 +86,14 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
   const [blushColor, setBlushColor] = useState('transparent');
   const [skinGlow, setSkinGlow] = useState(0.2);
 
-  const [selectedEyeshadowColor, setSelectedEyeshadowColor] = useState(incomingConfig && incomingConfig.tab === 'eyes' ? incomingConfig.hex : '#673147'); // Default selection
-  const [selectedBlushColor, setSelectedBlushColor] = useState(incomingConfig && incomingConfig.tab === 'face' ? incomingConfig.hex : '#ff8a80');
-  const [selectedLipstickColor, setSelectedLipstickColor] = useState(incomingConfig && incomingConfig.tab === 'lips' ? incomingConfig.hex : '#4B0082');
+  const [selectedEyeshadowColor, setSelectedEyeshadowColor] = useState(incomingConfig && incomingConfig.tab === 'eyes' ? incomingConfig.hex : 'transparent');
+  const [selectedBlushColor, setSelectedBlushColor] = useState(incomingConfig && incomingConfig.tab === 'face' ? incomingConfig.hex : 'transparent');
+  const [selectedLipstickColor, setSelectedLipstickColor] = useState(incomingConfig && incomingConfig.tab === 'lips' ? incomingConfig.hex : 'transparent');
 
-  // Isolated opacity settings
-  const [lipsOpacity, setLipsOpacity] = useState(0); // Only AI image should be visible
-  const [eyesOpacity, setEyesOpacity] = useState(0.3);
-  const [blushOpacity, setBlushOpacity] = useState(0.4);
+  // Isolated opacity settings - Start at 0
+  const [lipsOpacity, setLipsOpacity] = useState(0); 
+  const [eyesOpacity, setEyesOpacity] = useState(0);
+  const [blushOpacity, setBlushOpacity] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
   const [lipstickColor, setLipstickColor] = useState('transparent');
@@ -584,8 +584,14 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                     if (activeTab === 'lips') {
                       setSelectedLipstickColor(color);
                       setLipstickColor(color);
-                    } else if (activeTab === 'eyes') setSelectedEyeshadowColor(color);
-                    else setSelectedBlushColor(color);
+                      setLipsOpacity(color === 'transparent' ? 0 : 0.8);
+                    } else if (activeTab === 'eyes') {
+                      setSelectedEyeshadowColor(color);
+                      setEyesOpacity(color === 'transparent' ? 0 : 0.4);
+                    } else {
+                      setSelectedBlushColor(color);
+                      setBlushOpacity(color === 'transparent' ? 0 : 0.4);
+                    }
                   }}
                   style={{
                     width: '100%',
@@ -650,10 +656,36 @@ export default function Studio() {
     <div className="container" style={{ paddingTop: '80px', paddingBottom: '80px', textAlign: 'center' }}>
       <span className="badge" style={{ display: 'inline-block', marginBottom: '1rem' }}>SECURED • PHOTOREALISTIC • FREE</span>
       <h1 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.06em' }}>AI Pro Studio</h1>
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '60px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '60px' }}>
         <button className="btn btn-primary" style={{ height: '64px', padding: '0 40px' }} onClick={() => setSession({ image: 'camera_active', mode: 'camera' })}><Camera size={24} style={{ marginRight: '10px' }} /> Launch Live Camera</button>
+        
+        {/* Quick Start with Reference Model */}
+        <button 
+          className="btn" 
+          style={{ 
+            height: '64px', 
+            padding: '0 40px', 
+            background: 'rgba(255,255,255,0.05)', 
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            borderRadius: '16px'
+          }} 
+          onClick={() => setSession({ image: '/assets/before-after-main.png', mode: 'photo' })}
+        >
+          <Sparkles size={24} color={PRIMARY_COLOR} /> 
+          Try with Sample Model
+        </button>
       </div>
-      <div {...getRootProps()} className="glass-card" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px', border: isDragActive ? `4px dashed ${PRIMARY_COLOR}` : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '40px' }}><input {...getInputProps()} /><Upload size={40} style={{ color: PRIMARY_COLOR, marginBottom: '24px' }} /><h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Upload Photo for AI Try-On</h2></div>
+
+      <div {...getRootProps()} className="glass-card" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px', border: isDragActive ? `4px dashed ${PRIMARY_COLOR}` : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '40px' }}>
+        <input {...getInputProps()} />
+        <Upload size={40} style={{ color: PRIMARY_COLOR, marginBottom: '24px' }} />
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Upload Photo for AI Try-On</h2>
+        <p style={{ opacity: 0.6, marginTop: '10px' }}>or drag and drop here</p>
+      </div>
     </div>
   );
 }

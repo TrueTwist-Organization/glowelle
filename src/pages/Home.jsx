@@ -221,7 +221,7 @@ const Home = () => {
 
       {/* AI Studio Feature Section */}
       <section style={{ 
-        padding: 'clamp(4rem, 12vw, 8rem) 0', 
+        padding: 'clamp(2rem, 8vw, 4rem) 0', 
         background: 'transparent',
         position: 'relative',
         overflow: 'hidden'
@@ -235,138 +235,129 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             style={{ 
               background: 'rgba(255, 255, 255, 0.03)', 
-              padding: 'clamp(2rem, 8vw, 5rem) clamp(1rem, 5vw, 4rem)', 
-              borderRadius: '60px', 
+              padding: 'clamp(1.5rem, 5vw, 3rem) clamp(1rem, 5vw, 3rem)', 
+              borderRadius: '50px', 
               backdropFilter: 'blur(30px)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               boxShadow: '0 40px 100px rgba(0,0,0,0.3)',
               position: 'relative',
               overflow: 'hidden'
             }}
-          >
-            <div className="badge" style={{ background: 'rgba(255, 117, 143, 0.3)', border: '1px solid rgba(255, 117, 143, 0.6)', color: 'white', marginBottom: '2.5rem', display: 'inline-block', fontWeight: 900, letterSpacing: '0.1em' }}>NEURAL STUDIO V.2</div>
-            <h2 style={{ 
-              fontSize: 'clamp(3rem, 12vw, 6.5rem)', 
-              fontWeight: 950, 
-              marginBottom: '3.5rem', 
-              lineHeight: 1, 
-              background: 'linear-gradient(90deg, #FF758F, #FF1493, #FFB3C1, #FF758F)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              letterSpacing: '-0.04em',
-              textShadow: '0 0 30px rgba(255,117,143,0.3)'
-            }}>
-              TRY ON
-            </h2>
-
-            {/* Premium Before/After Comparison Slider */}
+          >            <motion.h2 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.08,
+                  }
+                }
+              }}
+              style={{ 
+                fontSize: 'clamp(1.5rem, 5vw, 2.8rem)', 
+                fontWeight: 950, 
+                marginBottom: '1rem', 
+                lineHeight: 1.1, 
+                background: 'linear-gradient(90deg, #FF758F, #FF1493, #FFB3C1, #FFD700, #FF758F)',
+                backgroundSize: '200% auto',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                letterSpacing: '-0.02em',
+                textShadow: '0 0 50px rgba(255,20,147,0.3)',
+                animation: 'gradientMove 3s linear infinite',
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.2))',
+                display: 'flex',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: '0 0.2em'
+              }}
+            >
+              {"BEAUTY IN ACTION".split(" ").map((word, wordIndex) => (
+                <span key={wordIndex} style={{ display: 'flex' }}>
+                  {word.split("").map((char, charIndex) => (
+                    <motion.span
+                      key={charIndex}
+                      variants={{
+                        hidden: { opacity: 0, y: 15, rotateX: -60 },
+                        visible: { 
+                          opacity: 1, y: 0, rotateX: 0,
+                          transition: { 
+                            type: "spring", 
+                            damping: 12, 
+                            stiffness: 200,
+                          }
+                        }
+                      }}
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </span>
+              ))}
+            </motion.h2>
+ 
+            {/* Premium Before/After Static Showcase */}
             <div style={{ 
               position: 'relative', 
               width: '100%', 
-              maxWidth: '550px', 
-              margin: '0 auto 4rem', 
-              borderRadius: '40px', 
+              maxWidth: '450px', 
+              margin: '0 auto 2rem', 
+              borderRadius: '30px', 
               overflow: 'hidden',
-              aspectRatio: '1/1',
-              boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+              aspectRatio: '0.85/1',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(255,117,143,0.15)',
               border: '4px solid rgba(255,255,255,0.05)',
-              cursor: 'ew-resize',
-              background: '#111'
+              background: '#000',
+              zIndex: 1
             }}>
-              {/* After Image (Base Layer) */}
               <img 
-                src="/assets/after.png" 
-                alt="After" 
+                src="/assets/before-after-main.png" 
+                alt="Before After Transformation" 
                 style={{ 
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '550px', // Fixed pixel width for perfect alignment
-                  height: '550px', 
+                  width: '100%',
+                  height: '100%', 
                   objectFit: 'cover',
                   display: 'block'
                 }}
               />
               
-              {/* Before Image (Clipped Overlay Layer) */}
+              {/* Premium Labels */}
+              <div style={{ position: 'absolute', top: '15px', left: '15px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em', border: '1px solid rgba(255,255,255,0.1)', zIndex: 5 }}>BEFORE</div>
+              <div style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--primary-makeup)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em', border: '1px solid rgba(255,255,255,0.1)', zIndex: 5 }}>AFTER</div>
+
               <div style={{ 
                 position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: `${sliderPos}%`, 
-                height: '100%', 
-                overflow: 'hidden',
-                borderRight: '3px solid white',
-                zIndex: 2,
-                pointerEvents: 'none'
+                bottom: '15px', 
+                left: '15px', 
+                background: 'rgba(0,0,0,0.6)', 
+                backdropFilter: 'blur(10px)', 
+                padding: '5px 12px', 
+                borderRadius: '100px', 
+                fontSize: '0.6rem', 
+                fontWeight: 900, 
+                color: 'white', 
+                letterSpacing: '0.1em',
+                border: '1px solid rgba(255,255,255,0.1)'
               }}>
-                <img 
-                  src="/assets/before.png" 
-                  alt="Before" 
-                  style={{ 
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '550px', // Matches the After image exactly
-                    height: '550px', 
-                    objectFit: 'cover',
-                    maxWidth: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Invisible Slider Input for Control */}
-              <input 
-                type="range" 
-                min="0" max="100" 
-                value={sliderPos}
-                onChange={(e) => setSliderPos(e.target.value)}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  opacity: 0,
-                  cursor: 'ew-resize',
-                  zIndex: 10
-                }}
-              />
-
-              {/* High-End Labels */}
-              <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em' }}>BEFORE</div>
-              <div style={{ position: 'absolute', top: '20px', right: '20px', background: 'var(--primary-makeup)', backdropFilter: 'blur(10px)', padding: '6px 16px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, color: 'white', letterSpacing: '0.1em' }}>AFTER</div>
-              
-              {/* Center Handle Indicator */}
-              <div style={{ 
-                position: 'absolute', 
-                left: `${sliderPos}%`, 
-                top: '50%', 
-                transform: 'translate(-50%, -50%)', 
-                width: '40px', 
-                height: '40px', 
-                background: 'white', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-                pointerEvents: 'none',
-                zIndex: 5
-              }}>
-                <div style={{ width: '12px', height: '2px', background: '#333', borderRadius: '2px' }} />
+                NEURAL TRANSFORMATION
               </div>
             </div>
             
-            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.3rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: '4rem', fontWeight: 500, maxWidth: '700px', margin: '0 auto 4rem' }}>
+            <p style={{ fontSize: 'clamp(0.8rem, 3vw, 1rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '2.5rem', fontWeight: 500, maxWidth: '600px', margin: '0 auto 2.5rem' }}>
               Witness the power of precision. Our neural engine understands every curve of your face for a flawless transformation.
             </p>
-
-            <div className="premium-button-wrap" style={{ margin: '0 auto' }}>
+ 
+            <div className="premium-button-wrap" style={{ margin: '0 auto', maxWidth: '300px' }}>
               <button 
                 className="premium-button-inner"
                 onClick={() => window.location.href='/test-model'}
-                style={{ fontSize: '1.2rem', padding: '1.4rem 4rem' }}
+                style={{ fontSize: '0.9rem', padding: '1rem 2rem' }}
               >
                 OPEN AI STUDIO
               </button>

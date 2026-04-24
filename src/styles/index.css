@@ -249,6 +249,11 @@ a:hover {
   to { background-position: 200% center; }
 }
 
+@keyframes gradientMove {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
 @keyframes wave {
   0%, 100% { transform: translateY(0px); }
   25% { transform: translateY(-8px); }
