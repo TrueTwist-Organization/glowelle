@@ -197,7 +197,13 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
 
       const res = await fetch("/api/lipstick", {
         method: "POST",
-        body: formData
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          image: finalSource, // Sending base64 directly
+          shade: selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor
+        })
       });
 
       if (res.ok) {
