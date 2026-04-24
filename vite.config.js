@@ -10,7 +10,7 @@ export default defineConfig({
         target: 'http://127.0.0.1:5678',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api\/lipstick/, '/webhook/lipstick-try-on'),
+        rewrite: (path) => path.replace(/^\/api\/lipstick/, '/webhook-test/lipstick-try-on'),
         timeout: 600000, 
         proxyTimeout: 600000,
         headers: {
