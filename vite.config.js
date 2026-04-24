@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/lipstick': {
-        target: 'http://localhost:5678',
+        target: 'http://127.0.0.1:5678',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/lipstick/, '/webhook/lipstick-try-on'),
         timeout: 300000, // 5 minutes for AI processing
