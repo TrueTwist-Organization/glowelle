@@ -238,17 +238,19 @@ const AIAssistant = () => {
               >
                 <div style={{ 
                   background: 'linear-gradient(135deg, rgba(132, 250, 176, 0.2), rgba(143, 211, 244, 0.2))',
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '24px',
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '30px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 2rem'
+                  margin: '0 auto 2.5rem',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
-                  <Upload size={40} className="text-skincare" />
+                  <Upload size={48} color="#84fab0" strokeWidth={2.5} />
                 </div>
-                <h3 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Upload Photo</h3>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 900 }}>Upload Photo</h3>
                 <p style={{ fontSize: '1rem', opacity: 0.6, marginTop: '0.8rem' }}>Choose from gallery</p>
                 <input 
                   type="file" 
@@ -273,15 +275,17 @@ const AIAssistant = () => {
               >
                 <div style={{ 
                   background: 'linear-gradient(135deg, rgba(183, 33, 255, 0.2), rgba(33, 212, 253, 0.2))',
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '24px',
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '30px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 2rem'
+                  margin: '0 auto 2.5rem',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
-                  <Camera size={40} className="text-eye-makeup" />
+                  <Camera size={48} color="#B721FF" strokeWidth={2.5} />
                 </div>
                 <h3 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Take Selfie</h3>
                 <p style={{ fontSize: '1rem', opacity: 0.6, marginTop: '0.8rem' }}>Use your camera</p>

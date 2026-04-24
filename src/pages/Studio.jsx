@@ -136,49 +136,34 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
         ctx.drawImage(img, 0, 0);
         
         // 2. Draw Makeup Overlays
-        if (landmarks && landmarks.length >= 68) {
+        if (landmarks && landmarks.length > 0) {
           // LIPS
           if (config.lipstick && config.lipstick !== 'transparent') {
             ctx.beginPath();
             ctx.fillStyle = config.lipstick;
-            ctx.globalAlpha = 0.6;
-            ctx.filter = `blur(${img.width * 0.005}px)`;
-            const lipPoints = landmarks.slice(48, 60); 
+            ctx.globalAlpha = 0.7;
+            ctx.filter = `blur(${img.width * 0.003}px)`;
+            
+            // Use all available landmarks for the lip path
+            const lipPoints = landmarks.length === 68 ? landmarks.slice(48, 60) : landmarks; 
             ctx.moveTo((lipPoints[0].x / 100) * img.width, (lipPoints[0].y / 100) * img.height);
             lipPoints.forEach(p => ctx.lineTo((p.x / 100) * img.width, (p.y / 100) * img.height));
             ctx.closePath();
             ctx.fill();
           }
           
-          // EYES
-          if (config.eyes && config.eyes !== 'transparent') {
+          // EYES (Only if 68 points)
+          if (landmarks.length === 68 && config.eyes && config.eyes !== 'transparent') {
             ctx.fillStyle = config.eyes;
             ctx.globalAlpha = 0.35;
             ctx.filter = `blur(${img.width * 0.015}px)`;
-            const le = landmarks[37]; // Top of left eye
+            const le = landmarks[37];
             ctx.beginPath();
             ctx.arc((le.x / 100) * img.width, ((le.y - 2) / 100) * img.height, img.width * 0.04, 0, 2 * Math.PI);
             ctx.fill();
-            const re = landmarks[44]; // Top of right eye
+            const re = landmarks[44];
             ctx.beginPath();
             ctx.arc((re.x / 100) * img.width, ((re.y - 2) / 100) * img.height, img.width * 0.04, 0, 2 * Math.PI);
-            ctx.fill();
-          }
-
-          // FACE (Foundation)
-          if (config.face && config.face !== 'transparent') {
-            ctx.fillStyle = config.face;
-            ctx.globalAlpha = 0.25;
-            ctx.filter = `blur(${img.width * 0.03}px)`;
-            ctx.beginPath();
-            ctx.moveTo((landmarks[0].x / 100) * img.width, (landmarks[0].y / 100) * img.height);
-            for(let i=1; i<=16; i++) {
-                ctx.lineTo((landmarks[i].x / 100) * img.width, (landmarks[i].y / 100) * img.height);
-            }
-            for(let i=26; i>=17; i--) {
-                ctx.lineTo((landmarks[i].x / 100) * img.width, ((landmarks[i].y - 6) / 100) * img.height);
-            }
-            ctx.closePath();
             ctx.fill();
           }
         }
@@ -490,8 +475,10 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                   animate={{ opacity: lipsOpacity }}
                   transition={{ duration: 0.6 }}
                   filter="url(#naturalSoftEdge)"
+                  style={{ mixBlendMode: 'multiply' }}
                 >
-                  {/* Local preview layers disabled as per request to see only AI output */}
+                  <path d={lipTopPath} fill={lipstickColor} />
+                  <path d={lipBotPath} fill={lipstickColor} />
                 </motion.g>
               </AnimatePresence>
 
@@ -659,25 +646,7 @@ export default function Studio() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', marginBottom: '60px' }}>
         <button className="btn btn-primary" style={{ height: '64px', padding: '0 40px' }} onClick={() => setSession({ image: 'camera_active', mode: 'camera' })}><Camera size={24} style={{ marginRight: '10px' }} /> Launch Live Camera</button>
         
-        {/* Quick Start with Reference Model */}
-        <button 
-          className="btn" 
-          style={{ 
-            height: '64px', 
-            padding: '0 40px', 
-            background: 'rgba(255,255,255,0.05)', 
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            borderRadius: '16px'
-          }} 
-          onClick={() => setSession({ image: '/assets/before-after-main.png', mode: 'photo' })}
-        >
-          <Sparkles size={24} color={PRIMARY_COLOR} /> 
-          Try with Sample Model
-        </button>
+
       </div>
 
       <div {...getRootProps()} className="glass-card" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px', border: isDragActive ? `4px dashed ${PRIMARY_COLOR}` : '2px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '40px' }}>
