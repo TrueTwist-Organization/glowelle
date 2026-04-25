@@ -109,6 +109,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
   const [lipBotPath, setLipBotPath] = useState("");
   const [eyeLPath, setEyeLPath] = useState("");
   const [eyeRPath, setEyeRPath] = useState("");
+  const [facePath, setFacePath] = useState("");
   const [cheekPins, setCheekPins] = useState([]);
   const [pins, setPins] = useState([]); // For manual editing
 
@@ -188,8 +189,11 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
 
     try {
       setIsLoading(true);
-      const shadeHex = selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor;
-      console.log("AI Tryon: Starting process for shade", shadeHex);
+      const lipHex = selectedLipstickColor.startsWith('#') ? selectedLipstickColor.slice(1) : selectedLipstickColor;
+      const eyeHex = selectedEyeshadowColor.startsWith('#') ? selectedEyeshadowColor.slice(1) : selectedEyeshadowColor;
+      const faceHex = selectedBlushColor.startsWith('#') ? selectedBlushColor.slice(1) : selectedBlushColor;
+      
+      console.log("AI Tryon: Starting process for shades", { lipHex, eyeHex, faceHex });
       setLoadingStage("AI GENERATING...");
 
       const formData = new FormData();
@@ -206,7 +210,10 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
 
       console.log("AI Tryon: Image blob created, size:", blob.size);
       formData.append('image', blob, 'image.jpg');
-      formData.append('shade', shadeHex);
+      formData.append('lip_shade', lipHex);
+      formData.append('eye_shade', eyeHex);
+      formData.append('face_shade', faceHex);
+      formData.append('shade', lipHex); // Legacy support
 
       console.log("AI Tryon: Sending POST request to /api/lipstick...");
       const res = await fetch("/api/lipstick", {
@@ -334,7 +341,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
         if (pts.length < 3) return "";
 
         let d = `M ${pts[0].x} ${pts[0].y}`;
-        const tension = 0.35; // Professional tension for natural lip curvature
+        const tension = 0.2; // Optimized for tight lip alignment
 
         for (let i = 0; i < pts.length; i++) {
           const p0 = pts[i === 0 ? pts.length - 1 : i - 1];
@@ -356,14 +363,21 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
         // Precise split for 68-point model
         setLipTopPath(smartPath([48, 49, 50, 51, 52, 53, 54, 64, 63, 62, 61, 60]));
         setLipBotPath(smartPath([54, 55, 56, 57, 58, 59, 48, 60, 67, 66, 65, 64]));
-        setEyeLPath(smartPath([17, 18, 19, 20, 21, 39, 38, 37, 36]));
-        setEyeRPath(smartPath([22, 23, 24, 25, 26, 45, 44, 43, 42]));
+
+        // Eyeshadow: Create an arch above the eyes using the top eye landmarks
+        setEyeLPath(smartPath([36, 37, 38, 39])); 
+        setEyeRPath(smartPath([42, 43, 44, 45]));
         setCheekPins([getP(2), getP(14)]);
+        
+        // Foundation/Face path: jawline + eyebrows
+        const facePoints = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17];
+        setFacePath(smartPath(facePoints));
       } else {
         // Fallback: use all pins for both (simplifies logic for custom maps)
         const path = smartPath(pins.map((_, i) => i));
         setLipTopPath(path);
         setLipBotPath(path);
+        setFacePath(path);
       }
     }
   }, [pins, naturalDims]);
@@ -385,7 +399,24 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
           <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: 'white' }}>AI Pro Studio</h2>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          {/* Export button removed */}
+          <button 
+            onClick={() => setIsCalibrating(!isCalibrating)} 
+            style={{ 
+              background: isCalibrating ? PRIMARY_COLOR : 'rgba(255,255,255,0.1)', 
+              border: 'none', 
+              color: 'white', 
+              padding: '6px 12px', 
+              borderRadius: '20px', 
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Zap size={14} /> {isCalibrating ? "SAVE" : "REFINE LIPS"}
+          </button>
         </div>
       </div>
 
@@ -449,11 +480,14 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
               {/* <image href={image} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" /> */}
 
               {/* Eyeshadow */}
-              <path d={eyeLPath} fill={eyeshadowColor} style={{ opacity: eyesOpacity, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.012}px)` }} />
-              <path d={eyeRPath} fill={eyeshadowColor} style={{ opacity: eyesOpacity, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.012}px)` }} />
+              <path d={eyeLPath} fill={eyeshadowColor} style={{ opacity: eyeshadowColor === 'transparent' ? 0 : 0.6, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.015}px)` }} />
+              <path d={eyeRPath} fill={eyeshadowColor} style={{ opacity: eyeshadowColor === 'transparent' ? 0 : 0.6, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.015}px)` }} />
 
               {/* Blush */}
-              {cheekPins.map((p, i) => <circle key={`cheek-${i}`} cx={p.x} cy={p.y} r={naturalDims.w * 0.06} fill={blushColor} style={{ opacity: blushOpacity, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.04}px)` }} />)}
+              {cheekPins.map((p, i) => <circle key={`cheek-${i}`} cx={p.x} cy={p.y} r={naturalDims.w * 0.06} fill={blushColor} style={{ opacity: blushColor === 'transparent' ? 0 : 0.4, mixBlendMode: 'multiply', filter: `blur(${naturalDims.w * 0.04}px)` }} />)}
+
+              {/* Foundation / Face Tint */}
+              <path d={facePath} fill={blushColor} style={{ opacity: blushColor === 'transparent' ? 0 : 0.15, mixBlendMode: 'soft-light', filter: `blur(${naturalDims.w * 0.05}px)` }} />
 
               <defs>
                 <radialGradient id="lipGloss" cx="50%" cy="50%" r="50%" fx="50%" fy="30%">
@@ -473,7 +507,7 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                 <motion.g
                   key={lipstickColor}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 0 }} // Forced to 0 to hide SVG overlay
+                  animate={{ opacity: lipstickColor === 'transparent' ? 0 : 0.7 }}
                   transition={{ duration: 0.6 }}
                   filter="url(#naturalSoftEdge)"
                   style={{ mixBlendMode: 'multiply' }}
@@ -611,9 +645,23 @@ const StudioUI = ({ initialImage, onReset, initialMode = 'photo', incomingConfig
                 setBlushColor(selectedBlushColor);
                 handleAutoTryon(sourceImage);
               }}
-              style={{ width: '100%', height: '36px', marginTop: '10px', borderRadius: '12px', background: PRIMARY_COLOR, color: 'white', border: 'none', fontWeight: 800, fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.3s' }}
+              disabled={isLoading}
+              style={{ 
+                width: '100%', 
+                height: '36px', 
+                marginTop: '10px', 
+                borderRadius: '12px', 
+                background: isLoading ? 'rgba(255,255,255,0.1)' : PRIMARY_COLOR, 
+                color: 'white', 
+                border: 'none', 
+                fontWeight: 800, 
+                fontSize: '0.75rem', 
+                cursor: isLoading ? 'not-allowed' : 'pointer', 
+                transition: 'all 0.3s',
+                opacity: isLoading ? 0.5 : 1
+              }}
             >
-              TRY ON
+              {isLoading ? "GENERATING..." : "TRY ON"}
             </button>
           </div>
         </div>
